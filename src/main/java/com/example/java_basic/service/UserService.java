@@ -11,6 +11,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 
+import com.example.java_basic.repository.MatchParticipantRepository;
+import com.example.java_basic.dto.TransactionResponseDTO;
+import com.example.java_basic.dto.MatchHistoryResponseDTO;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,6 +25,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final TransactionRepository transactionRepository;
+    private final MatchParticipantRepository matchParticipantRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
@@ -82,5 +86,40 @@ public class UserService {
         transactionRepository.save(tx);
 
         return mapToResponseDTO(savedUser);
+    }
+
+    public List<TransactionResponseDTO> getMyTransactions(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("KhA'ng tAm thy user"));
+
+        return transactionRepository.findByUserIdOrderByCreatedAtDesc(user.getId())
+                .stream()
+                .map(tx -> TransactionResponseDTO.builder()
+                        .id(tx.getId())
+                        .amount(tx.getAmount())
+                        .transactionType(tx.getTransactionType())
+                        .description(tx.getDescription())
+                        .createdAt(tx.getCreatedAt())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    public List<MatchHistoryResponseDTO> getMyMatches(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("KhA'ng tAm thy user"));
+
+        return matchParticipantRepository.findByUserId(user.getId())
+                .stream()
+                .map(mp -> MatchHistoryResponseDTO.builder()
+                        .matchId(mp.getMatch().getId())
+                        .courtName(mp.getMatch().getSession().getCourtName())
+                        .sessionDate(mp.getMatch().getSession().getSessionDate())
+                        .team(mp.getTeam())
+                        .teamAScore(mp.getMatch().getTeamAScore())
+                        .teamBScore(mp.getMatch().getTeamBScore())
+                        .pointDifference(mp.getPointDifference())
+                        .feeCalculated(mp.getFeeCalculated())
+                        .build())
+                .collect(Collectors.toList());
     }
 }

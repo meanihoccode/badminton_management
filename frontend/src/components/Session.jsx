@@ -11,6 +11,8 @@ const Session = () => {
     const [courtFee, setCourtFee] = useState('');
     const [shuttlecockFee, setShuttlecockFee] = useState('');
 
+    const role = localStorage.getItem('role');
+
     const handleCreateSession = async (e) => {
         e.preventDefault();
         try {
@@ -70,8 +72,9 @@ const Session = () => {
                     </form>
                 </div>
 
-                <div className="glass-panel">
-                    <h3 className="mb-4 text-danger">Chốt sổ buổi đánh (Admin)</h3>
+                {role === 'ROLE_ADMIN' && (
+                    <div className="glass-panel">
+                        <h3 className="mb-4 text-danger">Chốt sổ buổi đánh (Admin)</h3>
                     <form onSubmit={handleCloseSession}>
                         <div className="form-group">
                             <label className="form-label">ID Buổi Đánh</label>
@@ -109,6 +112,7 @@ const Session = () => {
                         <button type="submit" className="btn btn-danger" style={{ width: '100%' }}>Chốt sổ & Chia tiền</button>
                     </form>
                 </div>
+                )}
             </div>
         </div>
     );

@@ -41,7 +41,7 @@ public class AuthService {
         userRepository.save(user);
     }
 
-    public String login(Map<String, String> request) {
+    public Map<String, String> login(Map<String, String> request) {
         String username = request.get("username");
         String password = request.get("password");
 
@@ -52,6 +52,14 @@ public class AuthService {
 
         // Sinh token
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-        return jwtService.generateToken(userDetails);
+        String token = jwtService.generateToken(userDetails);
+        
+        String role = userDetails.getAuthorities().iterator().next().getAuthority(); // VD: ROLE_ADMIN
+        
+        return Map.of(
+            "token", token,
+            "username", userDetails.getUsername(),
+            "role", role
+        );
     }
 }

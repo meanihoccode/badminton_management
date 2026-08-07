@@ -6,6 +6,13 @@ const Players = () => {
     const [loading, setLoading] = useState(true);
     const [payAmount, setPayAmount] = useState('');
     const [selectedUserId, setSelectedUserId] = useState(null);
+    const role = localStorage.getItem('role');
+
+    // New member state
+    const [newUsername, setNewUsername] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [newFullName, setNewFullName] = useState('');
+    const [newRacket, setNewRacket] = useState('');
 
     const fetchUsers = async () => {
         try {
@@ -38,6 +45,27 @@ const Players = () => {
         }
     };
 
+    const handleCreateUser = async (e) => {
+        e.preventDefault();
+        try {
+            await api.post('/api/users', {
+                username: newUsername,
+                password: newPassword,
+                fullName: newFullName,
+                racketModel: newRacket
+            });
+            alert('Thêm thành viên mới thành công!');
+            setNewUsername('');
+            setNewPassword('');
+            setNewFullName('');
+            setNewRacket('');
+            fetchUsers();
+        } catch (error) {
+            console.error(error);
+            alert('Lỗi: Tên đăng nhập có thể đã tồn tại hoặc thiếu thông tin.');
+        }
+    };
+
     if (loading) return <div className="text-center mt-8">Đang tải dữ liệu...</div>;
 
     return (
@@ -63,10 +91,37 @@ const Players = () => {
                     </div>
                 </div>
 
-                {/* Cột phải: Form thanh toán */}
-                <div className="glass-panel">
-                    <h3 className="mb-4">Thanh Toán Nợ / Nạp Quỹ (Admin)</h3>
-                    <form onSubmit={handlePayDebt}>
+                {/* Cột phải: Các chức năng Admin */}
+                {role === 'ROLE_ADMIN' && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                        {/* Form Thêm Thành Viên */}
+                        <div className="glass-panel">
+                            <h3 className="mb-4 text-primary">Thêm Thành Viên Mới</h3>
+                            <form onSubmit={handleCreateUser}>
+                                <div className="form-group">
+                                    <label className="form-label">Tên đăng nhập</label>
+                                    <input type="text" className="form-input" value={newUsername} onChange={(e) => setNewUsername(e.target.value)} required />
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Mật khẩu</label>
+                                    <input type="password" className="form-input" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required />
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Họ và Tên</label>
+                                    <input type="text" className="form-input" value={newFullName} onChange={(e) => setNewFullName(e.target.value)} required />
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Dòng Vợt (Tùy chọn)</label>
+                                    <input type="text" className="form-input" value={newRacket} onChange={(e) => setNewRacket(e.target.value)} />
+                                </div>
+                                <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>Tạo Tài Khoản</button>
+                            </form>
+                        </div>
+
+                        {/* Form Thanh Toán */}
+                        <div className="glass-panel">
+                            <h3 className="mb-4 text-success">Thanh Toán Nợ / Nạp Quỹ</h3>
+                        <form onSubmit={handlePayDebt}>
                         <div className="form-group">
                             <label className="form-label">Chọn người chơi</label>
                             <select 
@@ -94,8 +149,10 @@ const Players = () => {
                             />
                         </div>
                         <button type="submit" className="btn btn-secondary" style={{ width: '100%' }}>Thực hiện giao dịch</button>
-                    </form>
-                </div>
+                        </form>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

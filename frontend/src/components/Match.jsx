@@ -94,7 +94,7 @@ const Match = () => {
                         />
                     </div>
 
-                    <div className="grid-2 mt-8">
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }} className="mt-8">
                         {/* TEAM A */}
                         <div className="glass-card" style={{ borderTop: '4px solid var(--primary-color)' }}>
                             <h3 className="text-center mb-4" style={{ color: 'var(--primary-color)' }}>Team A</h3>

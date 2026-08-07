@@ -36,9 +36,13 @@ public class SecurityConfig {
                         // Mở cửa cho API đăng nhập/đăng ký
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/auth/**", "/error").permitAll()
-                        // API chốt sổ và thanh toán nợ chỉ dành cho ADMIN
+                        // API quản lý (tạo buổi, chốt sổ, ghi điểm, nộp tiền, thêm thành viên) chỉ dành cho ADMIN
+                        .requestMatchers(HttpMethod.POST, "/api/sessions").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/matches/record").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/users").hasRole("ADMIN")
                         .requestMatchers("/api/sessions/*/close", "/api/users/*/pay").hasRole("ADMIN")
-                        // Tất cả các request khác (xem danh sách, nhập điểm) chỉ cần đăng nhập là được
+                        // API lịch sử cá nhân và xem danh sách chỉ cần đăng nhập
+                        .requestMatchers("/api/users/me/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 // JWT hoạt động stateless, không lưu session trên server
@@ -76,7 +80,7 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
 
         config.setAllowCredentials(true);
-        config.setAllowedOrigins(List.of("http://localhost:5173"));
+        config.setAllowedOriginPatterns(List.of("*"));
         config.setAllowedHeaders(List.of("*")); // Cho phép mọi Header
         config.setAllowedMethods(List.of("*")); // Cho phép mọi Method (GET, POST,...)
 

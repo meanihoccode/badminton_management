@@ -11,6 +11,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.security.Principal;
+import com.example.java_basic.dto.TransactionResponseDTO;
+import com.example.java_basic.dto.MatchHistoryResponseDTO;
 
 @RestController
 @RequestMapping("/api/users")
@@ -46,4 +49,14 @@ public class UserController {
 
         return ResponseEntity.ok(userService.payDebt(id, amount));
     } 
+
+    @GetMapping("/me/transactions")
+    public ResponseEntity<List<TransactionResponseDTO>> getMyTransactions(Principal principal) {
+        return ResponseEntity.ok(userService.getMyTransactions(principal.getName()));
+    }
+
+    @GetMapping("/me/matches")
+    public ResponseEntity<List<MatchHistoryResponseDTO>> getMyMatches(Principal principal) {
+        return ResponseEntity.ok(userService.getMyMatches(principal.getName()));
+    }
 }

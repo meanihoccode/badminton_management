@@ -17,6 +17,8 @@ const Login = () => {
         try {
             const response = await api.post('/api/auth/login', { username, password });
             localStorage.setItem('token', response.data.token);
+            localStorage.setItem('role', response.data.role);
+            localStorage.setItem('username', response.data.username);
             navigate('/');
         } catch (error) {
             console.error("Lỗi đăng nhập:", error);

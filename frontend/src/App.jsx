@@ -6,6 +6,7 @@ import Dashboard from './components/Dashboard';
 import Players from './components/Players';
 import Session from './components/Session';
 import Match from './components/Match';
+import History from './components/History';
 
 // Component bảo vệ Route
 const ProtectedRoute = ({ children }) => {
@@ -33,6 +34,7 @@ function App() {
                 <Route path="/players" element={<ProtectedRoute><Players /></ProtectedRoute>} />
                 <Route path="/sessions" element={<ProtectedRoute><Session /></ProtectedRoute>} />
                 <Route path="/matches" element={<ProtectedRoute><Match /></ProtectedRoute>} />
+                <Route path="/history" element={<ProtectedRoute><History /></ProtectedRoute>} />
                 
                 {/* Fallback route */}
                 <Route path="*" element={<Navigate to="/" replace />} />

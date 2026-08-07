@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
     const navigate = useNavigate();
+    const role = localStorage.getItem('role');
 
     return (
         <div className="animate-fade-in">
@@ -15,15 +16,24 @@ const Dashboard = () => {
                     <p style={{ color: 'var(--text-muted)' }}>Xem danh sách người chơi, kiểm tra số dư nợ/tồn quỹ và thanh toán.</p>
                 </div>
 
-                <div className="glass-card" onClick={() => navigate('/sessions')} style={{ cursor: 'pointer' }}>
-                    <h3 style={{ color: 'var(--secondary-color)', marginBottom: '10px' }}>Quản lý buổi đánh</h3>
-                    <p style={{ color: 'var(--text-muted)' }}>Tạo buổi đánh mới hoặc chốt sổ chia tiền (chỉ dành cho Admin).</p>
+                <div className="glass-card" onClick={() => navigate('/history')} style={{ cursor: 'pointer' }}>
+                    <h3 style={{ color: 'var(--success-color, #10b981)', marginBottom: '10px' }}>Lịch sử của tôi</h3>
+                    <p style={{ color: 'var(--text-muted)' }}>Xem lại lịch sử nạp tiền, trừ tiền và kết quả các trận đấu đã tham gia.</p>
                 </div>
 
-                <div className="glass-card" onClick={() => navigate('/matches')} style={{ cursor: 'pointer' }}>
-                    <h3 style={{ color: 'var(--danger-color)', marginBottom: '10px' }}>Ghi kết quả trận đấu</h3>
-                    <p style={{ color: 'var(--text-muted)' }}>Nhập điểm số, chọn người chơi để hệ thống tự động trừ tiền người thua.</p>
-                </div>
+                {role === 'ROLE_ADMIN' && (
+                    <>
+                        <div className="glass-card" onClick={() => navigate('/sessions')} style={{ cursor: 'pointer' }}>
+                            <h3 style={{ color: 'var(--secondary-color)', marginBottom: '10px' }}>Quản lý buổi đánh</h3>
+                            <p style={{ color: 'var(--text-muted)' }}>Tạo buổi đánh mới hoặc chốt sổ chia tiền (chỉ dành cho Admin).</p>
+                        </div>
+
+                        <div className="glass-card" onClick={() => navigate('/matches')} style={{ cursor: 'pointer' }}>
+                            <h3 style={{ color: 'var(--danger-color)', marginBottom: '10px' }}>Ghi kết quả trận đấu</h3>
+                            <p style={{ color: 'var(--text-muted)' }}>Nhập điểm số, chọn người chơi để hệ thống tự động trừ tiền người thua.</p>
+                        </div>
+                    </>
+                )}
             </div>
         </div>
     );
