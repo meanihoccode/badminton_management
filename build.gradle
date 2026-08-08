@@ -35,6 +35,11 @@ dependencies {
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 
+    // 3.5 MapStruct (Tự động map Entity <-> DTO)
+    implementation 'org.mapstruct:mapstruct:1.5.5.Final'
+    annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
+    annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
+
     // 4. Validation (Dùng để validate dữ liệu đầu vào cho các DTO)
     implementation 'org.springframework.boot:spring-boot-starter-validation'
 

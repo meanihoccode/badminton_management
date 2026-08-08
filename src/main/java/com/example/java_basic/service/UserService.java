@@ -18,6 +18,9 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import com.example.java_basic.mapper.UserMapper;
+import com.example.java_basic.mapper.TransactionMapper;
+import com.example.java_basic.mapper.MatchHistoryMapper;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +30,9 @@ public class UserService {
     private final TransactionRepository transactionRepository;
     private final MatchParticipantRepository matchParticipantRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UserMapper userMapper;
+    private final TransactionMapper transactionMapper;
+    private final MatchHistoryMapper matchHistoryMapper;
 
     @Transactional
     public UserResponseDTO createUser(UserRequestDTO dto) {
@@ -46,36 +52,24 @@ public class UserService {
                 .build();
 
         User savedUser = userRepository.save(user);
-        return mapToResponseDTO(savedUser);
+        return userMapper.toDto(savedUser);
     }
 
     public List<UserResponseDTO> getAllUsers() {
-        // Sử dụng Stream API và Lambda Expressions để map list Entity sang DTO
         return userRepository.findAll()
                 .stream()
-                .map(this::mapToResponseDTO)
+                .map(userMapper::toDto)
                 .collect(Collectors.toList());
-    }
-
-    // Hàm tiện ích chuyển đổi Entity -> DTO
-    private UserResponseDTO mapToResponseDTO(User user) {
-        return UserResponseDTO.builder()
-                .id(user.getId())
-                .fullName(user.getFullName())
-                .email(user.getEmail())
-                .racketModel(user.getRacketModel())
-                .balance(user.getBalance())
-                .build();
     }
 
     @Transactional
     public UserResponseDTO updateUser(Long id, com.example.java_basic.dto.UserUpdateRequestDTO dto) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy user"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy User"));
         user.setFullName(dto.getFullName());
         user.setEmail(dto.getEmail());
         user.setRacketModel(dto.getRacketModel());
-        return mapToResponseDTO(userRepository.save(user));
+        return userMapper.toDto(userRepository.save(user));
     }
 
     @Transactional
@@ -105,41 +99,26 @@ public class UserService {
                 .build();
         transactionRepository.save(tx);
 
-        return mapToResponseDTO(savedUser);
+        return userMapper.toDto(savedUser);
     }
 
     public List<TransactionResponseDTO> getMyTransactions(String username) {
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException("KhA'ng tAm thy user"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy User"));
 
         return transactionRepository.findByUserIdOrderByCreatedAtDesc(user.getId())
                 .stream()
-                .map(tx -> TransactionResponseDTO.builder()
-                        .id(tx.getId())
-                        .amount(tx.getAmount())
-                        .transactionType(tx.getTransactionType())
-                        .description(tx.getDescription())
-                        .createdAt(tx.getCreatedAt())
-                        .build())
+                .map(transactionMapper::toDto)
                 .collect(Collectors.toList());
     }
 
     public List<MatchHistoryResponseDTO> getMyMatches(String username) {
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException("KhA'ng tAm thy user"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy User"));
 
         return matchParticipantRepository.findByUserId(user.getId())
                 .stream()
-                .map(mp -> MatchHistoryResponseDTO.builder()
-                        .matchId(mp.getMatch().getId())
-                        .courtName(mp.getMatch().getSession().getCourtName())
-                        .sessionDate(mp.getMatch().getSession().getSessionDate())
-                        .team(mp.getTeam())
-                        .teamAScore(mp.getMatch().getTeamAScore())
-                        .teamBScore(mp.getMatch().getTeamBScore())
-                        .pointDifference(mp.getPointDifference())
-                        .feeCalculated(mp.getFeeCalculated())
-                        .build())
+                .map(matchHistoryMapper::toDto)
                 .collect(Collectors.toList());
     }
 }

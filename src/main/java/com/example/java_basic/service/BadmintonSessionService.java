@@ -16,6 +16,7 @@ import java.math.RoundingMode;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import com.example.java_basic.mapper.SessionMapper;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +26,7 @@ public class BadmintonSessionService {
     private final GameMatchRepository matchRepository;
     private final UserRepository userRepository;
     private final TransactionRepository transactionRepository;
+    private final SessionMapper sessionMapper;
 
     @Transactional
     public SessionResponseDTO createSession(SessionRequestDTO dto) {
@@ -37,7 +39,7 @@ public class BadmintonSessionService {
                 .build();
 
         BadmintonSession savedSession = sessionRepository.save(session);
-        return mapToResponseDTO(savedSession);
+        return sessionMapper.toDto(savedSession);
     }
 
     // Hàm chốt sổ: Tính tổng tiền sân/cầu và chia đều cho những người có tham gia đánh
@@ -84,16 +86,5 @@ public class BadmintonSessionService {
         }
 
         sessionRepository.save(session);
-    }
-
-    private SessionResponseDTO mapToResponseDTO(BadmintonSession session) {
-        return SessionResponseDTO.builder()
-                .id(session.getId())
-                .courtName(session.getCourtName())
-                .sessionDate(session.getSessionDate())
-                .totalCourtFee(session.getTotalCourtFee())
-                .shuttlecockFee(session.getShuttlecockFee())
-                .status(session.getStatus())
-                .build();
     }
 }
