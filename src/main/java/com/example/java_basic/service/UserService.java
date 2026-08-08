@@ -69,6 +69,24 @@ public class UserService {
     }
 
     @Transactional
+    public UserResponseDTO updateUser(Long id, com.example.java_basic.dto.UserUpdateRequestDTO dto) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy user"));
+        user.setFullName(dto.getFullName());
+        user.setEmail(dto.getEmail());
+        user.setRacketModel(dto.getRacketModel());
+        return mapToResponseDTO(userRepository.save(user));
+    }
+
+    @Transactional
+    public void deleteUser(Long id) {
+        if (!userRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Không tìm thấy user");
+        }
+        userRepository.deleteById(id);
+    }
+
+    @Transactional
     public UserResponseDTO payDebt(Long userId, BigDecimal amount) {
         // 1. Tìm người dùng
         User user = userRepository.findById(userId)

@@ -18,8 +18,8 @@ public class DebtReminderJob {
     private final UserRepository userRepository;
     private final EmailService emailService;
 
-    // Chạy mỗi 1 phút để test dễ dàng. Thực tế thường dùng: "0 0 8 * * MON" (8h sáng thứ Hai)
-    @Scheduled(fixedRate = 60000)
+    // Chạy mỗi ngày vào lúc 8h sáng
+    @Scheduled(cron = "0 0 8 * * *")
     public void scanAndSendDebtReminders() {
         log.info("Bắt đầu quét danh sách thành viên nợ quỹ...");
         List<User> debtors = userRepository.findUsersInDebt();

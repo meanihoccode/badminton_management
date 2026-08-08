@@ -40,6 +40,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/sessions").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/matches/record").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/users").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/users/*").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/users/*").hasRole("ADMIN")
                         .requestMatchers("/api/sessions/*/close", "/api/users/*/pay").hasRole("ADMIN")
                         // API lịch sử cá nhân và xem danh sách chỉ cần đăng nhập
                         .requestMatchers("/api/users/me/**").authenticated()

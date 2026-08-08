@@ -15,6 +15,12 @@ const Players = () => {
     const [newEmail, setNewEmail] = useState('');
     const [newRacket, setNewRacket] = useState('');
 
+    // Edit member state
+    const [editingUserId, setEditingUserId] = useState(null);
+    const [editFullName, setEditFullName] = useState('');
+    const [editEmail, setEditEmail] = useState('');
+    const [editRacket, setEditRacket] = useState('');
+
     const fetchUsers = async () => {
         try {
             const res = await api.get('/api/users');
@@ -69,6 +75,42 @@ const Players = () => {
         }
     };
 
+    const handleDeleteUser = async (id) => {
+        if (!window.confirm("Bạn có chắc chắn muốn xóa thành viên này? Toàn bộ dữ liệu của họ sẽ bị xóa.")) return;
+        try {
+            await api.delete(`/api/users/${id}`);
+            alert('Xóa thành viên thành công!');
+            fetchUsers();
+        } catch (error) {
+            console.error(error);
+            alert('Lỗi: Không thể xóa thành viên này.');
+        }
+    };
+
+    const startEditing = (user) => {
+        setEditingUserId(user.id);
+        setEditFullName(user.fullName);
+        setEditEmail(user.email || '');
+        setEditRacket(user.racketModel || '');
+    };
+
+    const handleUpdateUser = async (e) => {
+        e.preventDefault();
+        try {
+            await api.put(`/api/users/${editingUserId}`, {
+                fullName: editFullName,
+                email: editEmail,
+                racketModel: editRacket
+            });
+            alert('Cập nhật thông tin thành công!');
+            setEditingUserId(null);
+            fetchUsers();
+        } catch (error) {
+            console.error(error);
+            alert('Lỗi: Không thể cập nhật thông tin.');
+        }
+    };
+
     if (loading) return <div className="text-center mt-8">Đang tải dữ liệu...</div>;
 
     return (
@@ -81,14 +123,43 @@ const Players = () => {
                     <h3 className="mb-4">Tất cả người chơi</h3>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                         {users.map(u => (
-                            <div key={u.id} className="flex-between glass-card" style={{ padding: '15px' }}>
-                                <div>
-                                    <div className="fw-bold">{u.fullName}</div>
-                                    <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Vợt: {u.racketModel || 'Chưa cập nhật'}</div>
-                                </div>
-                                <div className={u.balance < 0 ? 'text-danger fw-bold' : 'text-success fw-bold'} style={{ fontSize: '1.2rem' }}>
-                                    {u.balance} VNĐ
-                                </div>
+                            <div key={u.id} className="glass-card" style={{ padding: '15px' }}>
+                                {editingUserId === u.id ? (
+                                    <form onSubmit={handleUpdateUser}>
+                                        <div className="form-group mb-2">
+                                            <input type="text" className="form-input" value={editFullName} onChange={e => setEditFullName(e.target.value)} placeholder="Họ và tên" required />
+                                        </div>
+                                        <div className="form-group mb-2">
+                                            <input type="email" className="form-input" value={editEmail} onChange={e => setEditEmail(e.target.value)} placeholder="Email" required />
+                                        </div>
+                                        <div className="form-group mb-2">
+                                            <input type="text" className="form-input" value={editRacket} onChange={e => setEditRacket(e.target.value)} placeholder="Dòng vợt" />
+                                        </div>
+                                        <div style={{ display: 'flex', gap: '10px' }}>
+                                            <button type="submit" className="btn btn-success" style={{ padding: '6px 12px', backgroundColor: 'var(--secondary-color)', color: 'white', border: 'none', borderRadius: '4px' }}>Lưu</button>
+                                            <button type="button" className="btn btn-secondary" onClick={() => setEditingUserId(null)} style={{ padding: '6px 12px', border: 'none', borderRadius: '4px' }}>Hủy</button>
+                                        </div>
+                                    </form>
+                                ) : (
+                                    <div className="flex-between">
+                                        <div>
+                                            <div className="fw-bold">{u.fullName}</div>
+                                            <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Vợt: {u.racketModel || 'Chưa cập nhật'}</div>
+                                            <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Email: {u.email || 'Chưa cập nhật'}</div>
+                                        </div>
+                                        <div style={{ textAlign: 'right' }}>
+                                            <div className={u.balance < 0 ? 'text-danger fw-bold' : 'text-success fw-bold'} style={{ fontSize: '1.2rem', marginBottom: '8px' }}>
+                                                {u.balance} VNĐ
+                                            </div>
+                                            {role === 'ROLE_ADMIN' && (
+                                                <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                                                    <button onClick={() => startEditing(u)} style={{ padding: '4px 8px', fontSize: '0.8rem', backgroundColor: '#eab308', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Sửa</button>
+                                                    <button onClick={() => handleDeleteUser(u.id)} style={{ padding: '4px 8px', fontSize: '0.8rem', backgroundColor: 'var(--danger-color)', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Xóa</button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         ))}
                     </div>
