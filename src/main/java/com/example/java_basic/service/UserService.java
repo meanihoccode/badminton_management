@@ -38,6 +38,7 @@ public class UserService {
                 .username(dto.getUsername())
                 // 2. Mã hóa mật khẩu lưu vào DB
                 .password(passwordEncoder.encode(dto.getPassword()))
+                .email(dto.getEmail())
                 .fullName(dto.getFullName())
                 .role("MEMBER")
                 .racketModel(dto.getRacketModel())
@@ -61,6 +62,7 @@ public class UserService {
         return UserResponseDTO.builder()
                 .id(user.getId())
                 .fullName(user.getFullName())
+                .email(user.getEmail())
                 .racketModel(user.getRacketModel())
                 .balance(user.getBalance())
                 .build();

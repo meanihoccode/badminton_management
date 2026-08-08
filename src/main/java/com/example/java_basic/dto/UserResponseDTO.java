@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 public class UserResponseDTO {
     private Long id;
     private String fullName;
+    private String email;
     private String racketModel;
     private BigDecimal balance; // Để ReactJS tô màu đỏ nếu âm tiền, màu xanh nếu dương
 }

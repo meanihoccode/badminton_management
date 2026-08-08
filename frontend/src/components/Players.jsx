@@ -12,6 +12,7 @@ const Players = () => {
     const [newUsername, setNewUsername] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [newFullName, setNewFullName] = useState('');
+    const [newEmail, setNewEmail] = useState('');
     const [newRacket, setNewRacket] = useState('');
 
     const fetchUsers = async () => {
@@ -52,12 +53,14 @@ const Players = () => {
                 username: newUsername,
                 password: newPassword,
                 fullName: newFullName,
+                email: newEmail,
                 racketModel: newRacket
             });
             alert('Thêm thành viên mới thành công!');
             setNewUsername('');
             setNewPassword('');
             setNewFullName('');
+            setNewEmail('');
             setNewRacket('');
             fetchUsers();
         } catch (error) {
@@ -109,6 +112,10 @@ const Players = () => {
                                 <div className="form-group">
                                     <label className="form-label">Họ và Tên</label>
                                     <input type="text" className="form-input" value={newFullName} onChange={(e) => setNewFullName(e.target.value)} required />
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Email (Dùng để nhắc nợ)</label>
+                                    <input type="email" className="form-input" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} required />
                                 </div>
                                 <div className="form-group">
                                     <label className="form-label">Dòng Vợt (Tùy chọn)</label>

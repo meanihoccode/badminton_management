@@ -12,6 +12,9 @@ public class UserRequestDTO {
     @NotBlank(message = "Mật khẩu không được để trống")
     private String password;
 
+    @NotBlank(message = "Email không được để trống")
+    private String email;
+
     @NotBlank(message = "Tên người chơi không được để trống")
     private String fullName;
 
