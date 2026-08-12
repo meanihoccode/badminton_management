@@ -14,9 +14,12 @@ import lombok.RequiredArgsConstructor;
 import com.example.java_basic.repository.MatchParticipantRepository;
 import com.example.java_basic.dto.TransactionResponseDTO;
 import com.example.java_basic.dto.MatchHistoryResponseDTO;
+import com.example.java_basic.dto.projection.UserSummaryProjection;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import com.example.java_basic.mapper.UserMapper;
 import com.example.java_basic.mapper.TransactionMapper;
@@ -33,11 +36,13 @@ public class UserService {
     private final UserMapper userMapper;
     private final TransactionMapper transactionMapper;
     private final MatchHistoryMapper matchHistoryMapper;
+    private final MessageSource messageSource;
 
     @Transactional
     public UserResponseDTO createUser(UserRequestDTO dto) {
         if (userRepository.findByUsername(dto.getUsername()).isPresent()) {
-            throw new IllegalArgumentException("Username đã tồn tại!");
+            String msg = messageSource.getMessage("error.username.exists", null, LocaleContextHolder.getLocale());
+            throw new IllegalArgumentException(msg);
         }
 
         User user = User.builder()
@@ -55,17 +60,17 @@ public class UserService {
         return userMapper.toDto(savedUser);
     }
 
-    public List<UserResponseDTO> getAllUsers() {
-        return userRepository.findAll()
-                .stream()
-                .map(userMapper::toDto)
-                .collect(Collectors.toList());
+    public List<UserSummaryProjection> getAllUsers() {
+        return userRepository.findAllProjectedBy();
     }
 
     @Transactional
     public UserResponseDTO updateUser(Long id, com.example.java_basic.dto.UserUpdateRequestDTO dto) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy User"));
+                .orElseThrow(() -> {
+                    String msg = messageSource.getMessage("error.user.not.found", new Object[]{id}, LocaleContextHolder.getLocale());
+                    return new ResourceNotFoundException(msg);
+                });
         user.setFullName(dto.getFullName());
         user.setEmail(dto.getEmail());
         user.setRacketModel(dto.getRacketModel());

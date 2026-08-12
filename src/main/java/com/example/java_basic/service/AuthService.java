@@ -8,6 +8,8 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,13 +26,20 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
+    private final MessageSource messageSource;
 
     @Transactional
     public void register(Map<String, String> request) {
+        String username = request.get("username");
+        if (userRepository.findByUsername(username).isPresent()) {
+            String msg = messageSource.getMessage("error.username.exists", null, LocaleContextHolder.getLocale());
+            throw new IllegalArgumentException(msg);
+        }
+
         String role = request.getOrDefault("role", "MEMBER").toUpperCase();
 
         User user = User.builder()
-                .username(request.get("username"))
+                .username(username)
                 .password(passwordEncoder.encode(request.get("password")))
                 .fullName(request.get("fullName"))
                 .role(role)

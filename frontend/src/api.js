@@ -20,4 +20,25 @@ api.interceptors.request.use(
     }
 );
 
+// Interceptor: Xử lý lỗi trả về từ Backend (ví dụ: Token hết hạn)
+api.interceptors.response.use(
+    (response) => {
+        return response;
+    },
+    (error) => {
+        if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+            // Nếu lỗi 401 (Unauthorized) hoặc 403 (Forbidden)
+            const token = localStorage.getItem('token');
+            if (token) {
+                // Chỉ thông báo nếu trước đó có token (nghĩa là token bị hết hạn)
+                alert('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!');
+                localStorage.removeItem('token');
+                localStorage.removeItem('username');
+                window.location.href = '/login';
+            }
+        }
+        return Promise.reject(error);
+    }
+);
+
 export default api;

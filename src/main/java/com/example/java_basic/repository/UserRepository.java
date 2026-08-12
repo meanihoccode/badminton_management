@@ -4,6 +4,7 @@ import com.example.java_basic.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import com.example.java_basic.dto.projection.UserSummaryProjection;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,4 +16,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     // Dùng HQL để lấy danh sách những người đang nợ tiền quỹ (balance < 0)
     @Query("SELECT u FROM User u WHERE u.balance < 0")
     List<User> findUsersInDebt();
+
+    // Dùng Projection để chỉ SELECT đúng các cột cần thiết (id, username, fullName, balance) thay vì SELECT *
+    List<UserSummaryProjection> findAllProjectedBy();
 }

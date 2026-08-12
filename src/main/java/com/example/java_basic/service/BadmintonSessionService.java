@@ -16,6 +16,8 @@ import java.math.RoundingMode;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import com.example.java_basic.mapper.SessionMapper;
 
 @Service
@@ -27,6 +29,7 @@ public class BadmintonSessionService {
     private final UserRepository userRepository;
     private final TransactionRepository transactionRepository;
     private final SessionMapper sessionMapper;
+    private final MessageSource messageSource;
 
     @Transactional
     public SessionResponseDTO createSession(SessionRequestDTO dto) {
@@ -42,14 +45,19 @@ public class BadmintonSessionService {
         return sessionMapper.toDto(savedSession);
     }
 
+
     // Hàm chốt sổ: Tính tổng tiền sân/cầu và chia đều cho những người có tham gia đánh
     @Transactional
     public void closeSession(Long sessionId, BigDecimal totalCourtFee, BigDecimal shuttlecockFee) {
         BadmintonSession session = sessionRepository.findById(sessionId)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy buổi đánh"));
+                .orElseThrow(() -> {
+                    String msg = messageSource.getMessage("error.session.not.found", null, LocaleContextHolder.getLocale());
+                    return new ResourceNotFoundException(msg);
+                });
 
         if ("COMPLETED".equals(session.getStatus())) {
-            throw new IllegalStateException("Buổi đánh này đã được chốt sổ rồi!");
+            String msg = messageSource.getMessage("error.session.already.closed", null, LocaleContextHolder.getLocale());
+            throw new IllegalStateException(msg);
         }
 
         session.setTotalCourtFee(totalCourtFee);

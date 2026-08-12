@@ -1,0 +1,8 @@
+Câu hỏi:
+    -có token secret thì có thể làm giả mạo, có cách nào chống không
+    -service test nên kiểm tra dữ liệu xem lưu đúng không
+Thiếu các nội dung sau:
+    -Hơi thiếu java core: abstract class, ...
+    -Projection
+    -@Async
+    -multilanguage

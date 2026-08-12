@@ -14,6 +14,9 @@ import java.util.List;
 import java.security.Principal;
 import com.example.java_basic.dto.TransactionResponseDTO;
 import com.example.java_basic.dto.MatchHistoryResponseDTO;
+import com.example.java_basic.dto.projection.UserSummaryProjection;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 
 @RestController
 @RequestMapping("/api/users")
@@ -22,10 +25,11 @@ import com.example.java_basic.dto.MatchHistoryResponseDTO;
 public class UserController {
 
     private final UserService userService;
+    private final MessageSource messageSource;
 
     // API lấy danh sách tất cả thành viên kèm số dư
     @GetMapping
-    public ResponseEntity<List<UserResponseDTO>> getAllUsers() {
+    public ResponseEntity<List<UserSummaryProjection>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
     }
 
@@ -55,7 +59,8 @@ public class UserController {
             @RequestParam BigDecimal amount) {
 
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Số tiền thanh toán phải lớn hơn 0");
+            String msg = messageSource.getMessage("error.invalid.amount", null, LocaleContextHolder.getLocale());
+            throw new IllegalArgumentException(msg);
         }
 
         return ResponseEntity.ok(userService.payDebt(id, amount));

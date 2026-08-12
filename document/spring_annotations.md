@@ -10,6 +10,7 @@ Dưới đây là danh sách các "bùa chú" đã được sử dụng trong d�
 - `@GetMapping`, `@PostMapping`, `@PutMapping`, `@DeleteMapping`: Ánh xạ các hành động của Frontend với từng hàm tương ứng (Xem, Thêm, Sửa, Xóa).
 - `@RequestBody`: Ép Spring Boot lấy cục dữ liệu JSON mà Frontend gửi lên, rồi nhồi nó vào một cái Khuôn Java (DTO) tương ứng.
 - `@PathVariable("id")`: Cắt lấy con số nằm trên đường dẫn URL để gán vào biến trong code (Ví dụ `/api/users/5` thì lấy số `5`).
+- `@CrossOrigin`: Mở khóa "biên giới" cho API. Trình duyệt web mặc định có một lớp bảo vệ tên là CORS, nó cấm Frontend (chạy ở cổng `localhost:5173`) gọi sang Backend (chạy ở cổng `localhost:8080`) vì khác "địa chỉ nhà" (Origin). Việc gắn `@CrossOrigin` lên đầu Controller sẽ ra lệnh cho Spring Boot báo với trình duyệt rằng: "Không sao đâu, tôi cho phép Frontend ở cổng 5173 lấy dữ liệu của tôi". Nhờ đó React mới hiển thị được dữ liệu.
 
 ## 2. Tầng Service (Xử lý nghiệp vụ) & Core Spring Boot
 - `@Component`: Khai báo chung chung rằng "Đây là một hạt đậu (Bean)". Spring Boot lúc khởi động sẽ đi rà soát tất cả các class gắn `@Component` (hoặc các biến thể của nó như `@Service`, `@Repository`, `@RestController`) để tạo ra các đối tượng (Object) duy nhất (Singleton) và lưu vào một cái rổ (IoC Container).
