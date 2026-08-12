@@ -13,7 +13,8 @@ import java.util.List;
 @Entity
 @Table(name = "users")
 @Data @NoArgsConstructor @AllArgsConstructor @Builder
-public class User implements UserDetails {
+@EqualsAndHashCode(callSuper = true)
+public class User extends AbstractBaseEntity implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

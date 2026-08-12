@@ -38,7 +38,7 @@ const Match = () => {
         }
 
         try {
-            await api.post('/api/matches/record', {
+            const res = await api.post('/api/matches/record', {
                 sessionId: parseInt(sessionId),
                 teamAScore: parseInt(teamAScore),
                 teamBScore: parseInt(teamBScore),
@@ -54,7 +54,8 @@ const Match = () => {
             // Giữ nguyên Session ID và người chơi cho trận tiếp theo nếu cần
         } catch (error) {
             console.error(error);
-            alert('Lỗi: Ghi nhận thất bại.');
+            const errorMsg = error.response?.data || "Có lỗi xảy ra khi ghi nhận trận đấu";
+            alert(errorMsg);
         }
     };
 

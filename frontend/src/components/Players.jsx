@@ -83,7 +83,8 @@ const Players = () => {
             fetchUsers();
         } catch (error) {
             console.error(error);
-            alert('Lỗi: Không thể xóa thành viên này.');
+            const errorMsg = error.response?.data || "Không thể xóa thành viên này";
+            alert(errorMsg);
         }
     };
 

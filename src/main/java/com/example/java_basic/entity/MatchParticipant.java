@@ -6,7 +6,8 @@ import java.math.BigDecimal;
 @Entity
 @Table(name = "match_participants")
 @Data @NoArgsConstructor @AllArgsConstructor @Builder
-public class MatchParticipant {
+@EqualsAndHashCode(callSuper = true)
+public class MatchParticipant extends AbstractBaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

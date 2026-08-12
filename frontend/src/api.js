@@ -13,6 +13,8 @@ api.interceptors.request.use(
         if (token) {
             config.headers['Authorization'] = `Bearer ${token}`;
         }
+        // Ép backend trả về tiếng Việt
+        config.headers['Accept-Language'] = 'vi';
         return config;
     },
     (error) => {

@@ -6,7 +6,8 @@ import java.util.List;
 @Entity
 @Table(name = "game_matches")
 @Data @NoArgsConstructor @AllArgsConstructor @Builder
-public class GameMatch {
+@EqualsAndHashCode(callSuper = true)
+public class GameMatch extends AbstractBaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

@@ -8,7 +8,8 @@ import java.util.List;
 @Entity
 @Table(name = "badminton_sessions")
 @Data @NoArgsConstructor @AllArgsConstructor @Builder
-public class BadmintonSession {
+@EqualsAndHashCode(callSuper = true)
+public class BadmintonSession extends AbstractBaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

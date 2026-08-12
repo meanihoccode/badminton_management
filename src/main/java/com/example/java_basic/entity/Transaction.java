@@ -7,7 +7,8 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "transactions")
 @Data @NoArgsConstructor @AllArgsConstructor @Builder
-public class Transaction {
+@EqualsAndHashCode(callSuper = true)
+public class Transaction extends AbstractBaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -23,12 +24,4 @@ public class Transaction {
     private String transactionType; // MATCH_FEE, DEPOSIT
 
     private String description;
-
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-    }
 }

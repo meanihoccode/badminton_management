@@ -1,6 +1,7 @@
 package com.example.java_basic.controller;
 
 import com.example.java_basic.dto.MatchResultDTO;
+import com.example.java_basic.exception.ResourceNotFoundException;
 import com.example.java_basic.service.MatchService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
