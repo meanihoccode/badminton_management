@@ -1,4 +1,5 @@
-package com.example.java_basic.service;
+package com.example.java_basic.service.impl;
+import com.example.java_basic.service.*;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;

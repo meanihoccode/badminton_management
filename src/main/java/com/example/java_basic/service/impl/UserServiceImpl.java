@@ -1,4 +1,5 @@
-package com.example.java_basic.service;
+package com.example.java_basic.service.impl;
+import com.example.java_basic.service.*;
 
 import com.example.java_basic.dto.UserRequestDTO;
 import com.example.java_basic.dto.UserResponseDTO;
@@ -18,6 +19,8 @@ import com.example.java_basic.dto.projection.UserSummaryProjection;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
+import com.example.java_basic.enums.TransactionType;
+import com.example.java_basic.enums.Role;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -51,7 +54,7 @@ public class UserServiceImpl implements UserService {
                 .password(passwordEncoder.encode(dto.getPassword()))
                 .email(dto.getEmail())
                 .fullName(dto.getFullName())
-                .role("MEMBER")
+                .role(Role.MEMBER)
                 .racketModel(dto.getRacketModel())
                 .balance(java.math.BigDecimal.ZERO)
                 .build();
@@ -106,7 +109,7 @@ public class UserServiceImpl implements UserService {
         Transaction tx = Transaction.builder()
                 .user(savedUser)
                 .amount(amount)
-                .transactionType("DEPOSIT")
+                .transactionType(TransactionType.DEPOSIT)
                 .description("Thanh toán tiền công nợ / Nạp quỹ")
                 .build();
         transactionRepository.save(tx);
@@ -134,3 +137,5 @@ public class UserServiceImpl implements UserService {
                 .collect(Collectors.toList());
     }
 }
+
+

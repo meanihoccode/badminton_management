@@ -1,4 +1,5 @@
-package com.example.java_basic.service;
+package com.example.java_basic.service.impl;
+import com.example.java_basic.service.*;
 
 import com.example.java_basic.dto.MatchResultDTO;
 import com.example.java_basic.entity.*;
@@ -10,6 +11,8 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import lombok.RequiredArgsConstructor;
 import java.math.BigDecimal;
+import com.example.java_basic.enums.Team;
+import com.example.java_basic.enums.TransactionType;
 import java.util.List;
 
 @Service
@@ -60,10 +63,10 @@ public class MatchServiceImpl implements MatchService {
         matchRepository.save(match);
 
         // 5. Cập nhật chi tiết từng người chơi (Participant, Balance, Transaction)
-        processPlayerResult(playerA1, match, "A", pointDiff, feeTeamA);
-        processPlayerResult(playerA2, match, "A", pointDiff, feeTeamA);
-        processPlayerResult(playerB1, match, "B", -pointDiff, feeTeamB);
-        processPlayerResult(playerB2, match, "B", -pointDiff, feeTeamB);
+        processPlayerResult(playerA1, match, Team.A, pointDiff, feeTeamA);
+        processPlayerResult(playerA2, match, Team.A, pointDiff, feeTeamA);
+        processPlayerResult(playerB1, match, Team.B, -pointDiff, feeTeamB);
+        processPlayerResult(playerB2, match, Team.B, -pointDiff, feeTeamB);
     }
 
     private User getUser(Long userId) {
@@ -74,7 +77,7 @@ public class MatchServiceImpl implements MatchService {
                 });
     }
 
-    private void processPlayerResult(User user, GameMatch match, String team, int pointDiff, BigDecimal fee) {
+    private void processPlayerResult(User user, GameMatch match, Team team, int pointDiff, BigDecimal fee) {
         // Lưu lịch sử tham gia trận
         MatchParticipant participant = MatchParticipant.builder()
                 .match(match)
@@ -97,9 +100,11 @@ public class MatchServiceImpl implements MatchService {
         Transaction transaction = Transaction.builder()
                 .user(user)
                 .amount(fee)
-                .transactionType("MATCH_FEE")
+                .transactionType(TransactionType.MATCH_FEE)
                 .description(desc)
                 .build();
         transactionRepository.save(transaction);
     }
 }
+
+

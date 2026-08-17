@@ -5,6 +5,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import com.example.java_basic.enums.Role;
 import java.util.Collection;
 import java.util.List;
 import java.math.BigDecimal;
@@ -28,8 +29,9 @@ public class User extends AbstractBaseEntity implements UserDetails {
     @Column(name = "full_name", nullable = false)
     private String fullName;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String role; // ADMIN, MEMBER
+    private Role role; // ADMIN, MEMBER
 
     @Column(nullable = false)
     private BigDecimal balance = BigDecimal.ZERO;
@@ -51,7 +53,7 @@ public class User extends AbstractBaseEntity implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         // Ánh xạ role (ADMIN, MEMBER) sang chuẩn của Spring Security (ROLE_ADMIN, ROLE_MEMBER)
-        return List.of(new SimpleGrantedAuthority("ROLE_" + this.role));
+        return List.of(new SimpleGrantedAuthority("ROLE_" + this.role.name()));
     }
 
     @Override

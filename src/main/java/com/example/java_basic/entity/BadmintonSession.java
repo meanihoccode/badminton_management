@@ -4,6 +4,7 @@ import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import com.example.java_basic.enums.SessionStatus;
 
 @Entity
 @Table(name = "badminton_sessions")
@@ -26,8 +27,9 @@ public class BadmintonSession extends AbstractBaseEntity {
     @Column(name = "shuttlecock_fee")
     private BigDecimal shuttlecockFee;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String status; // OPEN, COMPLETED
+    private SessionStatus status; // OPEN, COMPLETED
 
     // 1 Buổi đánh có nhiều Trận đấu
     @OneToMany(mappedBy = "session", cascade = CascadeType.ALL)

@@ -1,4 +1,5 @@
-package com.example.java_basic.service;
+package com.example.java_basic.service.impl;
+import com.example.java_basic.service.*;
 
 import com.example.java_basic.dto.SessionRequestDTO;
 import com.example.java_basic.dto.SessionResponseDTO;
@@ -16,6 +17,8 @@ import java.math.RoundingMode;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import com.example.java_basic.enums.SessionStatus;
+import com.example.java_basic.enums.TransactionType;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import com.example.java_basic.mapper.SessionMapper;
@@ -36,7 +39,7 @@ public class BadmintonSessionServiceImpl implements BadmintonSessionService {
         BadmintonSession session = BadmintonSession.builder()
                 .courtName(dto.getCourtName())
                 .sessionDate(dto.getSessionDate())
-                .status("OPEN")
+                .status(SessionStatus.OPEN)
                 .totalCourtFee(BigDecimal.ZERO)
                 .shuttlecockFee(BigDecimal.ZERO)
                 .build();
@@ -55,14 +58,14 @@ public class BadmintonSessionServiceImpl implements BadmintonSessionService {
                     return new ResourceNotFoundException(msg);
                 });
 
-        if ("COMPLETED".equals(session.getStatus())) {
+        if (SessionStatus.COMPLETED.equals(session.getStatus())) {
             String msg = messageSource.getMessage("error.session.already.closed", null, LocaleContextHolder.getLocale());
             throw new IllegalStateException(msg);
         }
 
         session.setTotalCourtFee(totalCourtFee);
         session.setShuttlecockFee(shuttlecockFee);
-        session.setStatus("COMPLETED");
+        session.setStatus(SessionStatus.COMPLETED);
 
         // 1. Lấy danh sách tất cả các trận đấu trong buổi
         List<GameMatch> matches = matchRepository.findBySessionId(sessionId);
@@ -86,7 +89,7 @@ public class BadmintonSessionServiceImpl implements BadmintonSessionService {
                 Transaction tx = Transaction.builder()
                         .user(player)
                         .amount(feePerPlayer.negate()) // Ghi âm tiền
-                        .transactionType("COURT_FEE")
+                        .transactionType(TransactionType.COURT_FEE)
                         .description("Trừ tiền chia sẻ sân và cầu ngày " + session.getSessionDate())
                         .build();
                 transactionRepository.save(tx);
@@ -96,3 +99,5 @@ public class BadmintonSessionServiceImpl implements BadmintonSessionService {
         sessionRepository.save(session);
     }
 }
+
+

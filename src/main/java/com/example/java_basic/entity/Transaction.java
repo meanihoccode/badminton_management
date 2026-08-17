@@ -3,6 +3,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import com.example.java_basic.enums.TransactionType;
 
 @Entity
 @Table(name = "transactions")
@@ -20,8 +21,9 @@ public class Transaction extends AbstractBaseEntity {
     @Column(nullable = false)
     private BigDecimal amount;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "transaction_type", nullable = false)
-    private String transactionType; // MATCH_FEE, DEPOSIT
+    private TransactionType transactionType; // MATCH_FEE, DEPOSIT
 
     private String description;
 }

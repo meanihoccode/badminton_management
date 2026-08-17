@@ -2,6 +2,7 @@ package com.example.java_basic.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
+import com.example.java_basic.enums.Team;
 
 @Entity
 @Table(name = "match_participants")
@@ -20,8 +21,9 @@ public class MatchParticipant extends AbstractBaseEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String team; // A hoặc B
+    private Team team; // A hoặc B
 
     @Column(name = "point_difference")
     private Integer pointDifference;

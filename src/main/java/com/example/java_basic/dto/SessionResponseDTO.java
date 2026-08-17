@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Data;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import com.example.java_basic.enums.SessionStatus;
 
 @Data
 @Builder
@@ -13,5 +14,5 @@ public class SessionResponseDTO {
     private LocalDate sessionDate;
     private BigDecimal totalCourtFee;
     private BigDecimal shuttlecockFee;
-    private String status; // OPEN hoặc COMPLETED
+    private SessionStatus status; // OPEN hoặc COMPLETED
 }

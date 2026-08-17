@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.Map;
+import com.example.java_basic.enums.Role;
 
 @Service
 @RequiredArgsConstructor
@@ -36,13 +37,19 @@ public class AuthServiceImpl implements AuthService {
             throw new IllegalArgumentException(msg);
         }
 
-        String role = request.getOrDefault("role", "MEMBER").toUpperCase();
+        String roleStr = request.getOrDefault("role", "MEMBER").toUpperCase();
+        Role roleEnum;
+        try {
+            roleEnum = Role.valueOf(roleStr);
+        } catch (IllegalArgumentException e) {
+            roleEnum = Role.MEMBER;
+        }
 
         User user = User.builder()
                 .username(username)
                 .password(passwordEncoder.encode(request.get("password")))
                 .fullName(request.get("fullName"))
-                .role(role)
+                .role(roleEnum)
                 .racketModel(request.get("racketModel"))
                 .balance(BigDecimal.ZERO)
                 .build();

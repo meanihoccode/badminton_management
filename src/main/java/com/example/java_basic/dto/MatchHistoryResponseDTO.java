@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Data;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import com.example.java_basic.enums.Team;
 
 @Data
 @Builder
@@ -11,7 +12,7 @@ public class MatchHistoryResponseDTO {
     private Long matchId;
     private String courtName;
     private LocalDate sessionDate;
-    private String team; // A hoặc B
+    private Team team; // A hoặc B
     private Integer teamAScore;
     private Integer teamBScore;
     private Integer pointDifference;
