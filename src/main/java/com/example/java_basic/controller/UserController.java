@@ -21,7 +21,7 @@ import org.springframework.context.i18n.LocaleContextHolder;
 
 @RestController
 @RequestMapping("/api/users")
-@CrossOrigin(origins = "*") // Tạm mở CORS để test nhanh với React ở máy local
+
 @RequiredArgsConstructor
 public class UserController {
 

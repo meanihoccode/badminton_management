@@ -12,7 +12,7 @@ import java.math.BigDecimal;
 
 @RestController
 @RequestMapping("/api/sessions")
-@CrossOrigin(origins = "*")
+
 @RequiredArgsConstructor
 public class BadmintonSessionController {
 

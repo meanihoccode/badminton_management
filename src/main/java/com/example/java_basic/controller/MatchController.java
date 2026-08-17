@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/matches")
-@CrossOrigin(origins = "*")
+
 @RequiredArgsConstructor
 public class MatchController {
 
