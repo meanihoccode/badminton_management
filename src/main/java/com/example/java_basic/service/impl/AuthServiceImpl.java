@@ -53,6 +53,7 @@ public class AuthServiceImpl implements AuthService {
                 .username(username)
                 .password(passwordEncoder.encode(request.getPassword()))
                 .fullName(request.getFullName())
+                .email(request.getEmail())
                 .role(roleEnum)
                 .racketModel(request.getRacketModel())
                 .balance(BigDecimal.ZERO)
@@ -84,3 +85,4 @@ public class AuthServiceImpl implements AuthService {
                 .build();
     }
 }
+

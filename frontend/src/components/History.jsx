@@ -14,7 +14,7 @@ const History = () => {
                     api.get('/api/users/me/matches')
                 ]);
                 setTransactions(txRes.data);
-                setMatches(matchRes.data);
+                setMatches([...matchRes.data].reverse());
             } catch (error) {
                 console.error("Lỗi tải lịch sử:", error);
             }
@@ -105,7 +105,7 @@ const History = () => {
                                     <div className="flex-between" style={{ borderTop: '1px solid var(--panel-border)', paddingTop: '10px' }}>
                                         <span>Hiệu số: <strong>{m.pointDifference}</strong></span>
                                         {m.feeCalculated > 0 ? (
-                                            <span className="text-success fw-bold">Thắng (+5000 VNĐ)</span>
+                                            <span className="text-success fw-bold">+5000 VNĐ</span>
                                         ) : (
                                             <span className="text-danger fw-bold">{m.feeCalculated} VNĐ</span>
                                         )}

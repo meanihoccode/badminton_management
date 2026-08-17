@@ -1,4 +1,5 @@
 package com.example.java_basic.service.impl;
+import com.example.java_basic.enums.SessionStatus;
 import com.example.java_basic.service.*;
 
 import com.example.java_basic.dto.MatchResultDTO;
@@ -13,7 +14,10 @@ import lombok.RequiredArgsConstructor;
 import java.math.BigDecimal;
 import com.example.java_basic.enums.Team;
 import com.example.java_basic.enums.TransactionType;
+
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -36,6 +40,33 @@ public class MatchServiceImpl implements MatchService {
                     String msg = messageSource.getMessage("error.session.not.found", null, LocaleContextHolder.getLocale());
                     return new ResourceNotFoundException(msg);
                 });
+        if (SessionStatus.COMPLETED.equals(session.getStatus())) {
+            throw new IllegalStateException("Không thể ghi kết quả vào buổi đánh đã chốt sổ (COMPLETED).");
+        }
+
+        Set<Long> playerIds = new HashSet<>();
+        playerIds.add(dto.getPlayerA1Id());
+        playerIds.add(dto.getPlayerA2Id());
+        playerIds.add(dto.getPlayerB1Id());
+        playerIds.add(dto.getPlayerB2Id());
+        if (playerIds.size() < 4) {
+            throw new IllegalArgumentException("4 người chơi trong một trận đấu phải khác nhau hoàn toàn.");
+        }
+        int w = Math.max(dto.getTeamAScore(), dto.getTeamBScore());
+        int l = Math.min(dto.getTeamAScore(), dto.getTeamBScore());
+        boolean isValidScore = false;
+
+        if (w == 21 && l <= 19) {
+            isValidScore = true;
+        } else if (w > 21 && w < 30 && l == w - 2) {
+            isValidScore = true;
+        } else if (w == 30 && (l == 28 || l == 29)) {
+            isValidScore = true;
+        }
+
+        if (!isValidScore) {
+            throw new IllegalArgumentException("Tỉ số không hợp lệ theo luật BWF. (Chạm 21 cách 2 điểm, tối đa 30 điểm)");
+        }
 
         // 2. Lấy thông tin 4 người chơi
         User playerA1 = getUser(dto.getPlayerA1Id());
@@ -106,5 +137,7 @@ public class MatchServiceImpl implements MatchService {
         transactionRepository.save(transaction);
     }
 }
+
+
 
 

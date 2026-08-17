@@ -4,6 +4,7 @@ import com.example.java_basic.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 import com.example.java_basic.dto.AuthResponseDTO;
 import com.example.java_basic.dto.LoginRequestDTO;
@@ -23,8 +24,9 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody RegisterRequestDTO request) {
+    public ResponseEntity<String> register(@Valid @RequestBody RegisterRequestDTO request) {
         authService.register(request);
         return ResponseEntity.ok("Đăng ký thành công!");
     }
 }
+

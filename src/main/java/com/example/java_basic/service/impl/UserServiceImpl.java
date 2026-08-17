@@ -48,6 +48,10 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException(msg);
         }
 
+        if (userRepository.findByEmail(dto.getEmail()).isPresent()) {
+            throw new IllegalArgumentException("Email đã được sử dụng");
+        }
+
         User user = User.builder()
                 .username(dto.getUsername())
                 // 2. Mã hóa mật khẩu lưu vào DB
@@ -149,3 +153,4 @@ public class UserServiceImpl implements UserService {
         return userMapper.toDto(user);
     }
 }
+

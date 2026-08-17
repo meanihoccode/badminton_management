@@ -13,6 +13,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     // Spring Data JPA tự động dịch tên hàm thành câu SQL: SELECT * FROM users WHERE username = ?
     Optional<User> findByUsername(String username);
 
+    Optional<User> findByEmail(String email);
+
     // Dùng HQL để lấy danh sách những người đang nợ tiền quỹ (balance < 0)
     @Query("SELECT u FROM User u WHERE u.balance < 0")
     List<User> findUsersInDebt();
