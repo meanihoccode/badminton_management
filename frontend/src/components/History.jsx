@@ -105,7 +105,7 @@ const History = () => {
                                     <div className="flex-between" style={{ borderTop: '1px solid var(--panel-border)', paddingTop: '10px' }}>
                                         <span>Hiệu số: <strong>{m.pointDifference}</strong></span>
                                         {m.feeCalculated > 0 ? (
-                                            <span className="text-success fw-bold">Thắng (0 VNĐ)</span>
+                                            <span className="text-success fw-bold">Thắng (+5000 VNĐ)</span>
                                         ) : (
                                             <span className="text-danger fw-bold">{m.feeCalculated} VNĐ</span>
                                         )}

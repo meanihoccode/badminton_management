@@ -14,6 +14,7 @@ const Players = () => {
     const [newFullName, setNewFullName] = useState('');
     const [newEmail, setNewEmail] = useState('');
     const [newRacket, setNewRacket] = useState('');
+    const [newRole, setNewRole] = useState('MEMBER');
 
     // Edit member state
     const [editingUserId, setEditingUserId] = useState(null);
@@ -60,7 +61,8 @@ const Players = () => {
                 password: newPassword,
                 fullName: newFullName,
                 email: newEmail,
-                racketModel: newRacket
+                racketModel: newRacket,
+                role: newRole
             });
             alert('Thêm thành viên mới thành công!');
             setNewUsername('');
@@ -68,6 +70,7 @@ const Players = () => {
             setNewFullName('');
             setNewEmail('');
             setNewRacket('');
+            setNewRole('MEMBER');
             fetchUsers();
         } catch (error) {
             console.error(error);
@@ -149,9 +152,11 @@ const Players = () => {
                                             <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Email: {u.email || 'Chưa cập nhật'}</div>
                                         </div>
                                         <div style={{ textAlign: 'right' }}>
-                                            <div className={u.balance < 0 ? 'text-danger fw-bold' : 'text-success fw-bold'} style={{ fontSize: '1.2rem', marginBottom: '8px' }}>
-                                                {u.balance} VNĐ
-                                            </div>
+                                            {role === 'ROLE_ADMIN' && (
+                                                <div className={u.balance < 0 ? 'text-danger fw-bold' : 'text-success fw-bold'} style={{ fontSize: '1.2rem', marginBottom: '8px' }}>
+                                                    {u.balance} VNĐ
+                                                </div>
+                                            )}
                                             {role === 'ROLE_ADMIN' && (
                                                 <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
                                                     <button onClick={() => startEditing(u)} style={{ padding: '4px 8px', fontSize: '0.8rem', backgroundColor: '#eab308', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Sửa</button>
@@ -192,6 +197,13 @@ const Players = () => {
                                 <div className="form-group">
                                     <label className="form-label">Dòng Vợt (Tùy chọn)</label>
                                     <input type="text" className="form-input" value={newRacket} onChange={(e) => setNewRacket(e.target.value)} />
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Vai trò</label>
+                                    <select className="form-input" value={newRole} onChange={(e) => setNewRole(e.target.value)}>
+                                        <option value="MEMBER">MEMBER</option>
+                                        <option value="ADMIN">ADMIN</option>
+                                    </select>
                                 </div>
                                 <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>Tạo Tài Khoản</button>
                             </form>
@@ -238,3 +250,4 @@ const Players = () => {
 };
 
 export default Players;
+

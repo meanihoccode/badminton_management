@@ -1,8 +1,11 @@
 package com.example.java_basic.service;
 
-import java.util.Map;
+import com.example.java_basic.dto.LoginRequestDTO;
+import com.example.java_basic.dto.RegisterRequestDTO;
+import com.example.java_basic.dto.AuthResponseDTO;
 
 public interface AuthService {
-    void register(Map<String, String> request);
-    Map<String, String> login(Map<String, String> request);
+    void register(RegisterRequestDTO request);
+    AuthResponseDTO login(LoginRequestDTO request);
 }
+

@@ -15,7 +15,7 @@ import lombok.RequiredArgsConstructor;
 import com.example.java_basic.repository.MatchParticipantRepository;
 import com.example.java_basic.dto.TransactionResponseDTO;
 import com.example.java_basic.dto.MatchHistoryResponseDTO;
-import com.example.java_basic.dto.projection.UserSummaryProjection;
+
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -54,7 +54,7 @@ public class UserServiceImpl implements UserService {
                 .password(passwordEncoder.encode(dto.getPassword()))
                 .email(dto.getEmail())
                 .fullName(dto.getFullName())
-                .role(Role.MEMBER)
+                .role(dto.getRole() != null ? dto.getRole() : Role.MEMBER)
                 .racketModel(dto.getRacketModel())
                 .balance(java.math.BigDecimal.ZERO)
                 .build();
@@ -63,8 +63,14 @@ public class UserServiceImpl implements UserService {
         return userMapper.toDto(savedUser);
     }
 
-    public List<UserSummaryProjection> getAllUsers() {
-        return userRepository.findAllProjectedBy();
+    public List<UserResponseDTO> getAllUsers(boolean isAdmin) {
+        return userRepository.findAll().stream().map(user -> {
+            UserResponseDTO dto = userMapper.toDto(user);
+            if (!isAdmin) {
+                dto.setBalance(null);
+            }
+            return dto;
+        }).collect(Collectors.toList());
     }
 
     @Transactional
@@ -136,6 +142,10 @@ public class UserServiceImpl implements UserService {
                 .map(matchHistoryMapper::toDto)
                 .collect(Collectors.toList());
     }
+    @Override
+    public UserResponseDTO getMyProfile(String username) {
+        User user = userRepository.findByUsername(username)
+            .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        return userMapper.toDto(user);
+    }
 }
-
-

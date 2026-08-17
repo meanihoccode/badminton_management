@@ -5,7 +5,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
+import com.example.java_basic.dto.AuthResponseDTO;
+import com.example.java_basic.dto.LoginRequestDTO;
+import com.example.java_basic.dto.RegisterRequestDTO;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -15,13 +17,13 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody Map<String, String> request) {
-        Map<String, String> response = authService.login(request);
+    public ResponseEntity<AuthResponseDTO> login(@RequestBody LoginRequestDTO request) {
+        AuthResponseDTO response = authService.login(request);
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody Map<String, String> request) {
+    public ResponseEntity<String> register(@RequestBody RegisterRequestDTO request) {
         authService.register(request);
         return ResponseEntity.ok("Đăng ký thành công!");
     }

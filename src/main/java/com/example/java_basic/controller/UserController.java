@@ -14,7 +14,8 @@ import java.util.List;
 import java.security.Principal;
 import com.example.java_basic.dto.TransactionResponseDTO;
 import com.example.java_basic.dto.MatchHistoryResponseDTO;
-import com.example.java_basic.dto.projection.UserSummaryProjection;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 
@@ -24,13 +25,19 @@ import org.springframework.context.i18n.LocaleContextHolder;
 @RequiredArgsConstructor
 public class UserController {
 
+    @GetMapping("/me")
+    public ResponseEntity<com.example.java_basic.dto.UserResponseDTO> getMyProfile(Principal principal) {
+        return ResponseEntity.ok(userService.getMyProfile(principal.getName()));
+    }
+
     private final UserService userService;
     private final MessageSource messageSource;
 
     // API lấy danh sách tất cả thành viên kèm số dư
     @GetMapping
-    public ResponseEntity<List<UserSummaryProjection>> getAllUsers() {
-        return ResponseEntity.ok(userService.getAllUsers());
+    public ResponseEntity<List<UserResponseDTO>> getAllUsers(Authentication authentication) {
+        boolean isAdmin = authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        return ResponseEntity.ok(userService.getAllUsers(isAdmin));
     }
 
     // API thêm người chơi mới
@@ -76,3 +83,4 @@ public class UserController {
         return ResponseEntity.ok(userService.getMyMatches(principal.getName()));
     }
 }
+

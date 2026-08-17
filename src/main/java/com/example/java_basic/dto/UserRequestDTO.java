@@ -2,6 +2,7 @@ package com.example.java_basic.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
+import com.example.java_basic.enums.Role;
 
 @Data
 public class UserRequestDTO {
@@ -19,4 +20,6 @@ public class UserRequestDTO {
     private String fullName;
 
     private String racketModel;
+
+    private Role role;
 }

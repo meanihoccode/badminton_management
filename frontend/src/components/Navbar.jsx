@@ -22,9 +22,9 @@ const Navbar = () => {
                 <div className="nav-links">
                     <Link to="/">Trang chủ</Link>
                     <Link to="/history">Lịch sử của tôi</Link>
-                    <Link to="/players">Thành viên</Link>
                     {role === 'Admin' && (
                         <>
+                            <Link to="/players">Thành viên</Link>
                             <Link to="/sessions">Buổi đánh</Link>
                             <Link to="/matches">Ghi kết quả</Link>
                         </>
@@ -42,3 +42,4 @@ const Navbar = () => {
 };
 
 export default Navbar;
+
