@@ -47,7 +47,7 @@ public class EmailServiceImpl implements EmailService {
             MimeMessage message = javaMailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
             helper.setTo(to);
-            helper.setSubject("[Nhắc Nhở] Đóng quỹ sân cầu lông");
+            helper.setSubject("[Nhắc Nhở / Reminder] Đóng quỹ sân cầu lông / Badminton Fund Payment");
             helper.setText(htmlContent, true); // true = HTML
 
             javaMailSender.send(message);

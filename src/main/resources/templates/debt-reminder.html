@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Nhắc Nở Đóng Quỹ Sân</title>
+    <title>Nhắc Nợ / Debt Reminder</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -49,6 +49,13 @@
             color: #dc2626;
             font-weight: bold;
             font-size: 24px;
+            display: block;
+            margin-top: 8px;
+        }
+        .divider {
+            height: 1px;
+            background-color: #e5e7eb;
+            margin: 32px 0;
         }
         .footer {
             background-color: #f9fafb;
@@ -58,16 +65,6 @@
             color: #6b7280;
             border-top: 1px solid #e5e7eb;
         }
-        .btn {
-            display: inline-block;
-            background-color: #dc2626;
-            color: #ffffff;
-            text-decoration: none;
-            padding: 12px 24px;
-            border-radius: 6px;
-            font-weight: bold;
-            margin-top: 16px;
-        }
     </style>
 </head>
 <body>
@@ -76,19 +73,35 @@
             <h1>Badminton Management</h1>
         </div>
         <div class="content">
+            <!-- TIẾNG VIỆT -->
             <div class="greeting">Chào <span th:text="${fullName}">Thành viên</span>,</div>
             <p>Hệ thống ghi nhận bạn đang có số dư âm trong quỹ sân cầu lông. Để duy trì hoạt động của nhóm và đặt sân cho các buổi tiếp theo, bạn vui lòng đóng quỹ nhé!</p>
             
             <div class="debt-box">
                 Số tiền bạn đang nợ: <br>
-                <span class="amount" th:text="${debtAmount}">50,000 VNĐ</span>
+                <span class="amount" th:text="${debtAmount}">50,000 VND</span>
             </div>
             
             <p>Bạn có thể chuyển khoản cho Admin hoặc đóng tiền mặt ở buổi đánh tiếp theo.</p>
             <p>Trân trọng,<br>Ban Quản Lý Sân Cầu Lông</p>
+
+            <div class="divider"></div>
+
+            <!-- ENGLISH -->
+            <div class="greeting">Dear <span th:text="${fullName}">Member</span>,</div>
+            <p>Our system has recorded a negative balance in your badminton club fund. To help us maintain club activities and book courts for upcoming sessions, please settle your balance soon!</p>
+            
+            <div class="debt-box">
+                Your current outstanding balance: <br>
+                <span class="amount" th:text="${debtAmount}">50,000 VND</span>
+            </div>
+            
+            <p>You can transfer the amount to the Admin or pay in cash at our next session.</p>
+            <p>Best regards,<br>Badminton Club Management</p>
         </div>
         <div class="footer">
-            Đây là email tự động, vui lòng không trả lời.
+            Đây là email tự động, vui lòng không trả lời.<br>
+            This is an automated email, please do not reply.
         </div>
     </div>
 </body>

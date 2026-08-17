@@ -6,10 +6,10 @@ import jakarta.validation.constraints.Size;
 
 @Data
 public class LoginRequestDTO {
-    @NotBlank(message = "Username không được để trống")
-    @Size(min = 3, max = 20, message = "Username phải từ 3 đến 20 ký tự")
+    @NotBlank(message = "{val.username.notblank}")
+    @Size(min = 3, max = 20, message = "{val.username.size}")
     private String username;
-    @NotBlank(message = "Mật khẩu không được để trống")
-    @Size(min = 3, max = 20, message = "Mật khẩu phải từ 3 đến 20 ký tự")
+    @NotBlank(message = "{val.password.notblank}")
+    @Size(min = 3, max = 20, message = "{val.password.size}")
     private String password;
 }

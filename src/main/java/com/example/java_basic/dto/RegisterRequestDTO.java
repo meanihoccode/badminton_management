@@ -7,24 +7,24 @@ import jakarta.validation.constraints.Size;
 
 @Data
 public class RegisterRequestDTO {
-    @NotBlank(message = "Username không được để trống")
-    @Size(min = 3, max = 20, message = "Username phải từ 3 đến 20 ký tự")
+    @NotBlank(message = "{val.username.notblank}")
+    @Size(min = 3, max = 20, message = "{val.username.size}")
     private String username;
 
-    @NotBlank(message = "Mật khẩu không được để trống")
-    @Size(min = 6, max = 20, message = "Mật khẩu phải từ 6 đến 20 ký tự")
+    @NotBlank(message = "{val.password.notblank}")
+    @Size(min = 6, max = 20, message = "{val.password.size}")
     private String password;
 
-    @NotBlank(message = "Tên không được để trống")
-    @Size(min = 2, max = 50, message = "Tên phải từ 2 đến 50 ký tự")
+    @NotBlank(message = "{val.fullname.notblank}")
+    @Size(min = 2, max = 50, message = "{val.fullname.size}")
     private String fullName;
 
-    @NotBlank(message = "Email không được để trống")
-    @Email(message = "Email không đúng định dạng")
-    @Size(max = 100, message = "Email tối đa 100 ký tự")
+    @NotBlank(message = "{val.email.notblank}")
+    @Email(message = "{val.email.format}")
+    @Size(max = 100, message = "{val.email.size}")
     private String email;
 
-    @Size(max = 100, message = "Dòng vợt tối đa 100 ký tự")
+    @Size(max = 100, message = "{val.racket.size}")
     private String racketModel;
     private String role;
 }

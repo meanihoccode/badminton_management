@@ -49,7 +49,7 @@ public class UserServiceImpl implements UserService {
         }
 
         if (userRepository.findByEmail(dto.getEmail()).isPresent()) {
-            throw new IllegalArgumentException("Email đã được sử dụng");
+            throw new IllegalArgumentException("err.auth.email_exists");
         }
 
         User user = User.builder()
@@ -99,7 +99,7 @@ public class UserServiceImpl implements UserService {
                 });
         
         if (userToDelete.getUsername().equals(currentUsername)) {
-            throw new IllegalStateException("Hành động bị chặn: Bạn không thể tự xóa tài khoản của chính mình!");
+            throw new IllegalStateException("err.user.self_delete");
         }
 
         userRepository.deleteById(id);

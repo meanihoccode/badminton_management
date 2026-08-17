@@ -41,7 +41,7 @@ public class MatchServiceImpl implements MatchService {
                     return new ResourceNotFoundException(msg);
                 });
         if (SessionStatus.COMPLETED.equals(session.getStatus())) {
-            throw new IllegalStateException("Không thể ghi kết quả vào buổi đánh đã chốt sổ (COMPLETED).");
+            throw new IllegalStateException("err.match.record_completed");
         }
 
         Set<Long> playerIds = new HashSet<>();
@@ -50,7 +50,7 @@ public class MatchServiceImpl implements MatchService {
         playerIds.add(dto.getPlayerB1Id());
         playerIds.add(dto.getPlayerB2Id());
         if (playerIds.size() < 4) {
-            throw new IllegalArgumentException("4 người chơi trong một trận đấu phải khác nhau hoàn toàn.");
+            throw new IllegalArgumentException("err.match.duplicate_players");
         }
         int w = Math.max(dto.getTeamAScore(), dto.getTeamBScore());
         int l = Math.min(dto.getTeamAScore(), dto.getTeamBScore());
@@ -65,7 +65,7 @@ public class MatchServiceImpl implements MatchService {
         }
 
         if (!isValidScore) {
-            throw new IllegalArgumentException("Tỉ số không hợp lệ theo luật BWF. (Chạm 21 cách 2 điểm, tối đa 30 điểm)");
+            throw new IllegalArgumentException("err.match.invalid_score_bwf");
         }
 
         // 2. Lấy thông tin 4 người chơi

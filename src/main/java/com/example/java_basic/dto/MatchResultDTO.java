@@ -6,17 +6,17 @@ import lombok.Data;
 
 @Data
 public class MatchResultDTO {
-    @NotNull(message = "ID buổi đánh là bắt buộc")
+    @NotNull(message = "{val.session.notnull}")
     private Long sessionId;
 
-    @Min(value = 0, message = "Điểm số không được âm")
+    @Min(value = 0, message = "{val.score.min}")
     private int teamAScore;
 
-    @Min(value = 0, message = "Điểm số không được âm")
+    @Min(value = 0, message = "{val.score.min}")
     private int teamBScore;
 
-    @NotNull private Long playerA1Id;
-    @NotNull private Long playerA2Id;
-    @NotNull private Long playerB1Id;
-    @NotNull private Long playerB2Id;
+    @NotNull(message = "{val.player.notnull}") private Long playerA1Id;
+    @NotNull(message = "{val.player.notnull}") private Long playerA2Id;
+    @NotNull(message = "{val.player.notnull}") private Long playerB1Id;
+    @NotNull(message = "{val.player.notnull}") private Long playerB2Id;
 }

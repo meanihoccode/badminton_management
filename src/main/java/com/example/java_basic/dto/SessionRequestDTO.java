@@ -9,11 +9,11 @@ import java.time.LocalDate;
 
 @Data
 public class SessionRequestDTO {
-    @NotBlank(message = "Tên sân không được để trống")
-    @Size(min = 2, max = 50, message = "Tên sân phải từ 2 đến 50 ký tự")
+    @NotBlank(message = "{val.court.notblank}")
+    @Size(min = 2, max = 50, message = "{val.court.size}")
     private String courtName;
 
-    @NotNull(message = "Ngày đánh không được để trống")
-    @PastOrPresent(message = "Ngày đánh không được ở tương lai")
+    @NotNull(message = "{val.date.notnull}")
+    @PastOrPresent(message = "{val.date.past}")
     private LocalDate sessionDate;
 }
