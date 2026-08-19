@@ -14,24 +14,25 @@ import java.util.List;
 import java.security.Principal;
 import com.example.java_basic.dto.TransactionResponseDTO;
 import com.example.java_basic.dto.MatchHistoryResponseDTO;
+import com.example.java_basic.dto.projection.PlayerStatsProjection;
+import com.example.java_basic.repository.UserRepository;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 
 @RestController
 @RequestMapping("/api/users")
-
 @RequiredArgsConstructor
 public class UserController {
+
+    private final UserService userService;
+    private final UserRepository userRepository;
+    private final MessageSource messageSource;
 
     @GetMapping("/me")
     public ResponseEntity<com.example.java_basic.dto.UserResponseDTO> getMyProfile(Principal principal) {
         return ResponseEntity.ok(userService.getMyProfile(principal.getName()));
     }
-
-    private final UserService userService;
-    private final MessageSource messageSource;
 
     // API lấy danh sách tất cả thành viên kèm số dư
     @GetMapping
@@ -59,7 +60,6 @@ public class UserController {
     }
 
     // API Thanh toán nợ / Nạp quỹ
-    // Ví dụ URL: POST /api/users/3/pay?amount=15000
     @PostMapping("/{id}/pay")
     public ResponseEntity<UserResponseDTO> payDebt(
             @PathVariable Long id,
@@ -82,5 +82,9 @@ public class UserController {
     public ResponseEntity<List<MatchHistoryResponseDTO>> getMyMatches(Principal principal) {
         return ResponseEntity.ok(userService.getMyMatches(principal.getName()));
     }
-}
 
+    @GetMapping("/leaderboard")
+    public ResponseEntity<List<PlayerStatsProjection>> getLeaderboard() {
+        return ResponseEntity.ok(userRepository.getTopActivePlayers());
+    }
+}

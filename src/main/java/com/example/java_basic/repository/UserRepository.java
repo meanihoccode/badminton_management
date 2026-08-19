@@ -1,8 +1,9 @@
 package com.example.java_basic.repository;
 
 import com.example.java_basic.entity.User;
-import org.springframework.data.jpa.repository.JpaRepository;
+import com.example.java_basic.dto.projection.PlayerStatsProjection;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import com.example.java_basic.dto.projection.UserSummaryProjection;
 import java.util.List;
@@ -21,4 +22,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     // Dùng Projection để chỉ SELECT đúng các cột cần thiết (id, username, fullName, balance) thay vì SELECT *
     List<UserSummaryProjection> findAllProjectedBy();
+
+    // Native Query: Lấy Top 5 người chơi tham gia nhiều trận đấu nhất
+    @Query(value = "SELECT u.username, COUNT(mp.match_id) AS totalMatches FROM users u JOIN match_participants mp ON u.id = mp.user_id GROUP BY u.id ORDER BY totalMatches DESC LIMIT 5", nativeQuery = true)
+    List<PlayerStatsProjection> getTopActivePlayers();
 }

@@ -19,6 +19,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import com.example.java_basic.enums.SessionStatus;
 import com.example.java_basic.enums.TransactionType;
+import com.example.java_basic.component.SessionCostCalculator;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import com.example.java_basic.mapper.SessionMapper;
@@ -33,6 +35,7 @@ public class BadmintonSessionServiceImpl implements BadmintonSessionService {
     private final TransactionRepository transactionRepository;
     private final SessionMapper sessionMapper;
     private final MessageSource messageSource;
+    private final ObjectProvider<SessionCostCalculator> costCalculatorProvider;
 
     @Transactional
     public SessionResponseDTO createSession(SessionRequestDTO dto) {
@@ -78,8 +81,11 @@ public class BadmintonSessionServiceImpl implements BadmintonSessionService {
 
         if (!uniquePlayers.isEmpty()) {
             // 3. Tính tiền chia đều (Tiền sân + Tiền cầu) / Số người
-            BigDecimal totalFee = totalCourtFee.add(shuttlecockFee);
-            BigDecimal feePerPlayer = totalFee.divide(new BigDecimal(uniquePlayers.size()), 2, RoundingMode.HALF_UP);
+            SessionCostCalculator calculator = costCalculatorProvider.getObject();
+            calculator.addCourtFee(totalCourtFee);
+            calculator.addWaterFee(shuttlecockFee);
+            calculator.setPlayerCount(uniquePlayers.size());
+            BigDecimal feePerPlayer = calculator.calculateCostPerPlayer();
 
             // 4. Trừ tiền từng người và ghi lịch sử giao dịch
             for (User player : uniquePlayers) {
