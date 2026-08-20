@@ -23,10 +23,19 @@ const Players = () => {
     const [editEmail, setEditEmail] = useState('');
     const [editRacket, setEditRacket] = useState('');
 
-    const fetchUsers = async () => {
+    const [currentPage, setCurrentPage] = useState(0);
+    const [totalPages, setTotalPages] = useState(1);
+
+    const fetchUsers = async (page = 0) => {
         try {
-            const res = await api.get('/api/users');
-            setUsers(res.data);
+            const res = await api.get('/api/users?page=' + page + '&size=5');
+            if (res.data.content) {
+                setUsers(res.data.content);
+                setCurrentPage(res.data.currentPage);
+                setTotalPages(res.data.totalPages);
+            } else {
+                setUsers(res.data);
+            }
         } catch (error) {
             console.error("Lỗi tải danh sách người chơi:", error);
         } finally {
@@ -35,8 +44,8 @@ const Players = () => {
     };
 
     useEffect(() => {
-        fetchUsers();
-    }, []);
+        fetchUsers(currentPage);
+    }, [currentPage]);
 
     const handlePayDebt = async (e) => {
         e.preventDefault();
@@ -52,7 +61,7 @@ const Players = () => {
             setPayAmount('');
             setPayNote('');
             setSelectedUserId(null);
-            fetchUsers(); // Tải lại danh sách
+            fetchUsers(currentPage); // Tải lại danh sách
         } catch (error) {
             console.error(error);
             alert('Lỗi: Bạn có thể không có quyền Admin hoặc số tiền không hợp lệ.');
@@ -77,7 +86,7 @@ const Players = () => {
             setNewEmail('');
             setNewRacket('');
             setNewRole('MEMBER');
-            fetchUsers();
+            fetchUsers(currentPage);
         } catch (error) {
             console.error(error);
             alert('Lỗi: Tên đăng nhập có thể đã tồn tại hoặc thiếu thông tin.');
@@ -89,7 +98,7 @@ const Players = () => {
         try {
             await api.delete(`/api/users/${id}`);
             alert('Xóa thành viên thành công!');
-            fetchUsers();
+            fetchUsers(currentPage);
         } catch (error) {
             console.error(error);
             const errorMsg = error.response?.data || "Không thể xóa thành viên này";
@@ -114,7 +123,7 @@ const Players = () => {
             });
             alert('Cập nhật thông tin thành công!');
             setEditingUserId(null);
-            fetchUsers();
+            fetchUsers(currentPage);
         } catch (error) {
             console.error(error);
             alert('Lỗi: Không thể cập nhật thông tin.');
@@ -175,6 +184,14 @@ const Players = () => {
                             </div>
                         ))}
                     </div>
+
+                    {totalPages > 1 && (
+                        <div style={{ display: 'flex', justifyContent: 'center', gap: '15px', marginTop: '20px' }}>
+                            <button className="btn btn-secondary" disabled={currentPage === 0} onClick={() => setCurrentPage(p => p - 1)}>Trang trước</button>
+                            <span style={{ alignSelf: 'center' }}>Trang {currentPage + 1} / {totalPages}</span>
+                            <button className="btn btn-secondary" disabled={currentPage >= totalPages - 1} onClick={() => setCurrentPage(p => p + 1)}>Trang sau</button>
+                        </div>
+                    )}
                 </div>
 
                 {/* Cột phải: Các chức năng Admin */}

@@ -4,23 +4,41 @@ import api from '../api';
 const History = () => {
     const [transactions, setTransactions] = useState([]);
     const [matches, setMatches] = useState([]);
+    const [txPage, setTxPage] = useState(0);
+    const [txTotalPages, setTxTotalPages] = useState(1);
+    const [matchPage, setMatchPage] = useState(0);
+    const [matchTotalPages, setMatchTotalPages] = useState(1);
     const [activeTab, setActiveTab] = useState('transactions'); // 'transactions' or 'matches'
 
     useEffect(() => {
-        const fetchHistory = async () => {
+        const fetchTransactions = async () => {
             try {
-                const [txRes, matchRes] = await Promise.all([
-                    api.get('/api/users/me/transactions'),
-                    api.get('/api/users/me/matches')
-                ]);
-                setTransactions(txRes.data);
-                setMatches([...matchRes.data].reverse());
-            } catch (error) {
-                console.error("Lỗi tải lịch sử:", error);
-            }
+                const res = await api.get('/api/users/me/transactions?page=' + txPage + '&size=6');
+                if (res.data.content) {
+                    setTransactions(res.data.content);
+                    setTxTotalPages(res.data.totalPages);
+                } else {
+                    setTransactions(res.data);
+                }
+            } catch (error) { console.error(error); }
         };
-        fetchHistory();
-    }, []);
+        if (activeTab === 'transactions') fetchTransactions();
+    }, [txPage, activeTab]);
+
+    useEffect(() => {
+        const fetchMatches = async () => {
+            try {
+                const res = await api.get('/api/users/me/matches?page=' + matchPage + '&size=6');
+                if (res.data.content) {
+                    setMatches(res.data.content);
+                    setMatchTotalPages(res.data.totalPages);
+                } else {
+                    setMatches([...res.data].reverse());
+                }
+            } catch (error) { console.error(error); }
+        };
+        if (activeTab === 'matches') fetchMatches();
+    }, [matchPage, activeTab]);
 
     return (
         <div className="animate-fade-in">
@@ -85,6 +103,13 @@ const History = () => {
                             </tbody>
                         </table>
                     </div>
+                    {txTotalPages > 1 && (
+                        <div style={{ display: 'flex', justifyContent: 'center', gap: '15px', marginTop: '20px' }}>
+                            <button className="btn btn-secondary" disabled={txPage === 0} onClick={() => setTxPage(p => p - 1)}>Trang trước</button>
+                            <span style={{ alignSelf: 'center' }}>Trang {txPage + 1} / {txTotalPages}</span>
+                            <button className="btn btn-secondary" disabled={txPage >= txTotalPages - 1} onClick={() => setTxPage(p => p + 1)}>Trang sau</button>
+                        </div>
+                    )}
                 </div>
             )}
 
@@ -121,6 +146,13 @@ const History = () => {
                             ))
                         )}
                     </div>
+                    {matchTotalPages > 1 && (
+                        <div style={{ display: 'flex', justifyContent: 'center', gap: '15px', marginTop: '20px' }}>
+                            <button className="btn btn-secondary" disabled={matchPage === 0} onClick={() => setMatchPage(p => p - 1)}>Trang trước</button>
+                            <span style={{ alignSelf: 'center' }}>Trang {matchPage + 1} / {matchTotalPages}</span>
+                            <button className="btn btn-secondary" disabled={matchPage >= matchTotalPages - 1} onClick={() => setMatchPage(p => p + 1)}>Trang sau</button>
+                        </div>
+                    )}
                 </div>
             )}
         </div>

@@ -36,8 +36,13 @@ public class UserController {
 
     // API lấy danh sách tất cả thành viên kèm số dư
     @GetMapping
-    public ResponseEntity<List<UserResponseDTO>> getAllUsers(Authentication authentication) {
+    public ResponseEntity<?> getAllUsers(Authentication authentication,
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size) {
         boolean isAdmin = authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals(com.example.java_basic.constant.AppConstants.ROLE_ADMIN));
+        if (page != null && size != null) {
+            return ResponseEntity.ok(userService.getAllUsersPaged(isAdmin, page, size));
+        }
         return ResponseEntity.ok(userService.getAllUsers(isAdmin));
     }
 
@@ -75,12 +80,22 @@ public class UserController {
     } 
 
     @GetMapping("/me/transactions")
-    public ResponseEntity<List<TransactionResponseDTO>> getMyTransactions(Principal principal) {
+    public ResponseEntity<?> getMyTransactions(Principal principal,
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size) {
+        if (page != null && size != null) {
+            return ResponseEntity.ok(userService.getMyTransactionsPaged(principal.getName(), page, size));
+        }
         return ResponseEntity.ok(userService.getMyTransactions(principal.getName()));
     }
 
     @GetMapping("/me/matches")
-    public ResponseEntity<List<MatchHistoryResponseDTO>> getMyMatches(Principal principal) {
+    public ResponseEntity<?> getMyMatches(Principal principal,
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size) {
+        if (page != null && size != null) {
+            return ResponseEntity.ok(userService.getMyMatchesPaged(principal.getName(), page, size));
+        }
         return ResponseEntity.ok(userService.getMyMatches(principal.getName()));
     }
 

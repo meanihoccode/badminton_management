@@ -1,23 +1,20 @@
 package com.example.java_basic.service;
 
-import com.example.java_basic.dto.UserRequestDTO;
-import com.example.java_basic.dto.UserResponseDTO;
-import com.example.java_basic.dto.UserUpdateRequestDTO;
-import com.example.java_basic.dto.TransactionResponseDTO;
-import com.example.java_basic.dto.MatchHistoryResponseDTO;
-import com.example.java_basic.dto.UserResponseDTO;
+import com.example.java_basic.dto.*;
 import java.math.BigDecimal;
 import java.util.List;
 
 public interface UserService {
-    UserResponseDTO createUser(UserRequestDTO dto);
+    UserResponseDTO createUser(UserRequestDTO userRequestDTO);
     List<UserResponseDTO> getAllUsers(boolean isAdmin);
+    PageResponseDTO<UserResponseDTO> getAllUsersPaged(boolean isAdmin, int page, int size);
     UserResponseDTO updateUser(Long id, UserUpdateRequestDTO dto);
     void deleteUser(Long id, String currentUsername);
     UserResponseDTO payDebt(Long userId, BigDecimal amount);
-    // Minh họa Overloading: Cùng tên hàm payDebt nhưng thêm tham số note
     UserResponseDTO payDebt(Long userId, BigDecimal amount, String note);
     List<TransactionResponseDTO> getMyTransactions(String username);
+    PageResponseDTO<TransactionResponseDTO> getMyTransactionsPaged(String username, int page, int size);
     List<MatchHistoryResponseDTO> getMyMatches(String username);
+    PageResponseDTO<MatchHistoryResponseDTO> getMyMatchesPaged(String username, int page, int size);
     UserResponseDTO getMyProfile(String username);
 }

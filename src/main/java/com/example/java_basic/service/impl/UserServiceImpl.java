@@ -3,6 +3,7 @@ import com.example.java_basic.service.*;
 
 import com.example.java_basic.dto.UserRequestDTO;
 import com.example.java_basic.dto.UserResponseDTO;
+import com.example.java_basic.dto.PageResponseDTO;
 import com.example.java_basic.entity.Transaction;
 import com.example.java_basic.entity.User;
 import com.example.java_basic.exception.ResourceNotFoundException;
@@ -22,6 +23,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 import com.example.java_basic.enums.TransactionType;
 import com.example.java_basic.enums.Role;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -157,5 +161,61 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findByUsername(username)
             .orElseThrow(() -> new IllegalArgumentException("User not found"));
         return userMapper.toDto(user);
+    }
+    public PageResponseDTO<UserResponseDTO> getAllUsersPaged(boolean isAdmin, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<User> userPage = userRepository.findAll(pageable);
+        List<UserResponseDTO> content = userPage.getContent().stream().map(user -> {
+            UserResponseDTO dto = userMapper.toDto(user);
+            if (!isAdmin) {
+                dto.setBalance(null);
+            }
+            return dto;
+        }).collect(Collectors.toList());
+        
+        return PageResponseDTO.<UserResponseDTO>builder()
+                .content(content)
+                .currentPage(userPage.getNumber())
+                .totalPages(userPage.getTotalPages())
+                .totalElements(userPage.getTotalElements())
+                .build();
+    }
+
+    public PageResponseDTO<TransactionResponseDTO> getMyTransactionsPaged(String username, int page, int size) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy User"));
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Transaction> txPage = transactionRepository.findByUserIdOrderByCreatedAtDesc(user.getId(), pageable);
+        
+        List<TransactionResponseDTO> content = txPage.getContent().stream()
+                .map(transactionMapper::toDto)
+                .collect(Collectors.toList());
+                
+        return PageResponseDTO.<TransactionResponseDTO>builder()
+                .content(content)
+                .currentPage(txPage.getNumber())
+                .totalPages(txPage.getTotalPages())
+                .totalElements(txPage.getTotalElements())
+                .build();
+    }
+
+    public PageResponseDTO<MatchHistoryResponseDTO> getMyMatchesPaged(String username, int page, int size) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy User"));
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<com.example.java_basic.entity.MatchParticipant> matchPage = matchParticipantRepository.findByUserId(user.getId(), pageable);
+        
+        List<MatchHistoryResponseDTO> content = matchPage.getContent().stream()
+                .map(matchHistoryMapper::toDto)
+                .collect(Collectors.toList());
+                
+        return PageResponseDTO.<MatchHistoryResponseDTO>builder()
+                .content(content)
+                .currentPage(matchPage.getNumber())
+                .totalPages(matchPage.getTotalPages())
+                .totalElements(matchPage.getTotalElements())
+                .build();
     }
 }
