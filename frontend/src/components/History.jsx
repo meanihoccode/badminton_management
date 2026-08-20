@@ -64,14 +64,21 @@ const History = () => {
                                         <tr key={tx.id} style={{ borderBottom: '1px solid var(--panel-border)' }}>
                                             <td style={{ padding: '12px' }}>{new Date(tx.createdAt).toLocaleString('vi-VN')}</td>
                                             <td style={{ padding: '12px' }}>
-                                                {tx.description.startsWith("Trừ") ? (
+                                                {tx.description !== null && tx.description !== "" && tx.description.startsWith("Trừ") ? (
                                                     <span className="text-danger fw-bold">Bị trừ</span>
                                                 ) : (
                                                     <span className="text-success fw-bold">Đã nạp</span>
                                                 )}
                                             </td>
                                             <td style={{ padding: '12px' }}>{tx.amount}</td>
-                                            <td style={{ padding: '12px' }}>{tx.description}</td>
+                                            <td style={{ padding: '12px' }}>
+                                                {tx.description}
+                                                {tx.receipt && (
+                                                    <div style={{ marginTop: '10px', padding: '10px', backgroundColor: '#f9f9f9', border: '1px solid #ddd', borderRadius: '4px', fontSize: '0.85rem', whiteSpace: 'pre-wrap', fontFamily: 'monospace' }}>
+                                                        {tx.receipt}
+                                                    </div>
+                                                )}
+                                            </td>
                                         </tr>
                                     ))
                                 )}

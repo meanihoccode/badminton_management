@@ -37,7 +37,7 @@ public class UserController {
     // API lấy danh sách tất cả thành viên kèm số dư
     @GetMapping
     public ResponseEntity<List<UserResponseDTO>> getAllUsers(Authentication authentication) {
-        boolean isAdmin = authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        boolean isAdmin = authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals(com.example.java_basic.constant.AppConstants.ROLE_ADMIN));
         return ResponseEntity.ok(userService.getAllUsers(isAdmin));
     }
 
@@ -63,14 +63,15 @@ public class UserController {
     @PostMapping("/{id}/pay")
     public ResponseEntity<UserResponseDTO> payDebt(
             @PathVariable Long id,
-            @RequestParam BigDecimal amount) {
+            @RequestParam BigDecimal amount,
+            @RequestParam(required = false) String note) {
 
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
             String msg = messageSource.getMessage("error.invalid.amount", null, LocaleContextHolder.getLocale());
             throw new IllegalArgumentException(msg);
         }
 
-        return ResponseEntity.ok(userService.payDebt(id, amount));
+        return ResponseEntity.ok(note != null ? userService.payDebt(id, amount, note) : userService.payDebt(id, amount));
     } 
 
     @GetMapping("/me/transactions")

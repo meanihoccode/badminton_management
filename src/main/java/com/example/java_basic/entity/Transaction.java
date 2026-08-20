@@ -26,4 +26,7 @@ public class Transaction extends AbstractBaseEntity {
     private TransactionType transactionType; // MATCH_FEE, DEPOSIT
 
     private String description;
+
+    @Column(columnDefinition = "TEXT")
+    private String receipt;
 }

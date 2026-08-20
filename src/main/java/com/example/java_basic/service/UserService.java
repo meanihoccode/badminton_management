@@ -15,6 +15,8 @@ public interface UserService {
     UserResponseDTO updateUser(Long id, UserUpdateRequestDTO dto);
     void deleteUser(Long id, String currentUsername);
     UserResponseDTO payDebt(Long userId, BigDecimal amount);
+    // Minh họa Overloading: Cùng tên hàm payDebt nhưng thêm tham số note
+    UserResponseDTO payDebt(Long userId, BigDecimal amount, String note);
     List<TransactionResponseDTO> getMyTransactions(String username);
     List<MatchHistoryResponseDTO> getMyMatches(String username);
     UserResponseDTO getMyProfile(String username);

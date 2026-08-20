@@ -13,5 +13,6 @@ public class TransactionResponseDTO {
     private BigDecimal amount;
     private TransactionType transactionType;
     private String description;
+    private String receipt;
     private LocalDateTime createdAt;
 }

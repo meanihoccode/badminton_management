@@ -8,6 +8,7 @@ import com.example.java_basic.entity.User;
 import com.example.java_basic.exception.ResourceNotFoundException;
 import com.example.java_basic.repository.TransactionRepository;
 import com.example.java_basic.repository.UserRepository;
+import com.example.java_basic.component.InvoiceGenerator;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +38,7 @@ public class UserServiceImpl implements UserService {
     private final MatchParticipantRepository matchParticipantRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
+    private final InvoiceGenerator invoiceGenerator;
     private final TransactionMapper transactionMapper;
     private final MatchHistoryMapper matchHistoryMapper;
     private final MessageSource messageSource;
@@ -54,7 +56,6 @@ public class UserServiceImpl implements UserService {
 
         User user = User.builder()
                 .username(dto.getUsername())
-                // 2. Mã hóa mật khẩu lưu vào DB
                 .password(passwordEncoder.encode(dto.getPassword()))
                 .email(dto.getEmail())
                 .fullName(dto.getFullName())
@@ -107,24 +108,28 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     public UserResponseDTO payDebt(Long userId, BigDecimal amount) {
-        // 1. Tìm người dùng
+        return payDebt(userId, amount, "Thanh toán tiền công nợ / Nạp quỹ");
+    }
+
+    @Transactional
+    public UserResponseDTO payDebt(Long userId, BigDecimal amount, String note) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy thành viên có ID: " + userId));
 
-        // 2. Cộng tiền thanh toán vào ví hiện tại
         user.setBalance(user.getBalance().add(amount));
         User savedUser = userRepository.save(user);
 
-        // 3. Ghi lại lịch sử nạp tiền/xóa nợ
         Transaction tx = Transaction.builder()
                 .user(savedUser)
                 .amount(amount)
                 .transactionType(TransactionType.DEPOSIT)
-                .description("Thanh toán tiền công nợ / Nạp quỹ")
+                .receipt(invoiceGenerator.generateReceipt(savedUser.getFullName(), amount, note))
                 .build();
         transactionRepository.save(tx);
 
-        return userMapper.toDto(savedUser);
+        UserResponseDTO dto = userMapper.toDto(savedUser);
+        dto.setLatestReceipt(tx.getReceipt());
+        return dto;
     }
 
     public List<TransactionResponseDTO> getMyTransactions(String username) {
@@ -146,6 +151,7 @@ public class UserServiceImpl implements UserService {
                 .map(matchHistoryMapper::toDto)
                 .collect(Collectors.toList());
     }
+    
     @Override
     public UserResponseDTO getMyProfile(String username) {
         User user = userRepository.findByUsername(username)
@@ -153,4 +159,3 @@ public class UserServiceImpl implements UserService {
         return userMapper.toDto(user);
     }
 }
-

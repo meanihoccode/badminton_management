@@ -11,5 +11,6 @@ public class UserResponseDTO {
     private String fullName;
     private String email;
     private String racketModel;
-    private BigDecimal balance; // Để ReactJS tô màu đỏ nếu âm tiền, màu xanh nếu dương
+    private BigDecimal balance;
+    private String latestReceipt; // Để ReactJS tô màu đỏ nếu âm tiền, màu xanh nếu dương
 }

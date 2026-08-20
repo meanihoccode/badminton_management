@@ -5,6 +5,7 @@ const Players = () => {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [payAmount, setPayAmount] = useState('');
+    const [payNote, setPayNote] = useState('');
     const [selectedUserId, setSelectedUserId] = useState(null);
     const role = localStorage.getItem('role');
 
@@ -42,9 +43,14 @@ const Players = () => {
         if (!selectedUserId || !payAmount) return;
 
         try {
-            await api.post(`/api/users/${selectedUserId}/pay?amount=${payAmount}`);
-            alert('Thanh toán / Nạp quỹ thành công!');
+            const res = await api.post(`/api/users/` + selectedUserId + `/pay?amount=` + payAmount + (payNote ? `&note=` + encodeURIComponent(payNote) : ''));
+            if (res.data && res.data.latestReceipt) {
+                alert("Thanh toán thành công!\n\n" + res.data.latestReceipt);
+            } else {
+                alert('Thanh toán / Nạp quỹ thành công!');
+            }
             setPayAmount('');
+            setPayNote('');
             setSelectedUserId(null);
             fetchUsers(); // Tải lại danh sách
         } catch (error) {
@@ -239,7 +245,17 @@ const Players = () => {
                                 required 
                             />
                         </div>
-                        <button type="submit" className="btn btn-secondary" style={{ width: '100%' }}>Thực hiện giao dịch</button>
+                            <div className="form-group">
+                                <label className="form-label">Ghi chú (Tùy chọn)</label>
+                                <input 
+                                    type="text" 
+                                    className="form-input"
+                                    value={payNote}
+                                    onChange={(e) => setPayNote(e.target.value)}
+                                    placeholder="VD: Đóng quỹ tháng 5"
+                                />
+                            </div>
+                            <button type="submit" className="btn btn-secondary" style={{ width: '100%' }}>Thực hiện giao dịch</button>
                         </form>
                         </div>
                     </div>
