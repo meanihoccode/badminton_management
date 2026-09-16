@@ -1,59 +1,35 @@
 package com.example.java_basic.service.impl;
 import com.example.java_basic.service.*;
+import com.example.java_basic.dto.EmailMessageDTO;
 
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.scheduling.annotation.Async;
+import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Service;
-import org.thymeleaf.TemplateEngine;
-import org.thymeleaf.context.Context;
 
 import java.math.BigDecimal;
-import java.text.NumberFormat;
-import java.util.Locale;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class EmailServiceImpl implements EmailService {
 
-    private final JavaMailSender javaMailSender;
-    private final TemplateEngine templateEngine;
+    private final JmsTemplate jmsTemplate;
 
-    @Async("taskExecutor")
+    @Override
     public void sendDebtReminderEmail(String to, String fullName, BigDecimal debtAmount) {
         if (to == null || to.isEmpty()) {
-            log.warn("Không có email cho user {}, bỏ qua gửi nhắc nợ.", fullName);
+            log.warn("Khong co email cho user {}, bo qua gui nhac no.", fullName);
             return;
         }
 
-        try {
-            // Chuẩn bị biến cho HTML Template
-            Context context = new Context();
-            context.setVariable("fullName", fullName);
-            
-            // Format số tiền theo chuẩn VNĐ
-            NumberFormat format = NumberFormat.getInstance(new Locale("vi", "VN"));
-            String formattedDebt = format.format(debtAmount.abs()) + " VNĐ";
-            context.setVariable("debtAmount", formattedDebt);
+        EmailMessageDTO message = EmailMessageDTO.builder()
+                .to(to)
+                .fullName(fullName)
+                .debtAmount(debtAmount)
+                .build();
 
-            // Sinh HTML từ file debt-reminder.html
-            String htmlContent = templateEngine.process("debt-reminder", context);
-
-            MimeMessage message = javaMailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-            helper.setTo(to);
-            helper.setSubject("[Nhắc Nhở / Reminder] Đóng quỹ sân cầu lông / Badminton Fund Payment");
-            helper.setText(htmlContent, true); // true = HTML
-
-            javaMailSender.send(message);
-            log.info("Đã gửi email nhắc nợ thành công cho {}", to);
-        } catch (MessagingException e) {
-            log.error("Lỗi khi gửi email nhắc nợ cho {}: {}", to, e.getMessage());
-        }
+        jmsTemplate.convertAndSend("emailQueue", message);
+        log.info("Da day yeu cau gui email vao Queue cho {}", to);
     }
 }

@@ -49,10 +49,16 @@ dependencies {
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.5'
 
-    // 6. Testing (Unit Test / Integration Test)
+        // 6. Testing (Unit Test / Integration Test)
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // 7. Messaging (JMS & ActiveMQ Artemis)
+    implementation 'org.springframework.boot:spring-boot-starter-artemis'
+    implementation 'org.apache.activemq:artemis-server'
+    implementation 'org.apache.activemq:artemis-jms-server'
+    implementation 'org.apache.activemq:artemis-jakarta-server'
 }
 
 tasks.named('test') {

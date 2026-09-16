@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.security.authentication.BadCredentialsException;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,29 +30,50 @@ public class GlobalExceptionHandler {
 
     // Xử lý lỗi đăng nhập sai mật khẩu (Spring Security ném ra)
     @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<String> handleBadCredentials(BadCredentialsException ex) {
+    public ResponseEntity<Map<String, String>> handleBadCredentials(BadCredentialsException ex) {
         String message = messageSource.getMessage("err.auth.invalid_credentials", null, "Invalid username or password", org.springframework.context.i18n.LocaleContextHolder.getLocale());
-        return new ResponseEntity<>(message, HttpStatus.UNAUTHORIZED);
+        Map<String, String> body = new HashMap<>();
+        body.put("message", message);
+        body.put("error", HttpStatus.UNAUTHORIZED.getReasonPhrase());
+        return new ResponseEntity<>(body, HttpStatus.UNAUTHORIZED);
     }
 
     // Xử lý lỗi không tìm thấy (Custom Exception)
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<String> handleResourceNotFound(ResourceNotFoundException ex) {
+    public ResponseEntity<Map<String, String>> handleResourceNotFound(ResourceNotFoundException ex) {
         String message = messageSource.getMessage(ex.getMessage(), null, ex.getMessage(), org.springframework.context.i18n.LocaleContextHolder.getLocale());
-        return new ResponseEntity<>(message, HttpStatus.NOT_FOUND);
+        Map<String, String> body = new HashMap<>();
+        body.put("message", message);
+        body.put("error", HttpStatus.NOT_FOUND.getReasonPhrase());
+        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
     }
 
     // Xử lý lỗi logic (VD: chốt sổ buổi đánh đã hoàn thành)
     @ExceptionHandler(IllegalStateException.class)
-    public ResponseEntity<String> handleIllegalState(IllegalStateException ex) {
+    public ResponseEntity<Map<String, String>> handleIllegalState(IllegalStateException ex) {
         String message = messageSource.getMessage(ex.getMessage(), null, ex.getMessage(), org.springframework.context.i18n.LocaleContextHolder.getLocale());
-        return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
+        Map<String, String> body = new HashMap<>();
+        body.put("message", message);
+        body.put("error", HttpStatus.BAD_REQUEST.getReasonPhrase());
+        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
 
     // Xử lý lỗi dữ liệu không hợp lệ (VD: Tên đăng nhập đã tồn tại)
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<String> handleIllegalArgument(IllegalArgumentException ex) {
+    public ResponseEntity<Map<String, String>> handleIllegalArgument(IllegalArgumentException ex) {
         String message = messageSource.getMessage(ex.getMessage(), null, ex.getMessage(), org.springframework.context.i18n.LocaleContextHolder.getLocale());
-        return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
+        Map<String, String> body = new HashMap<>();
+        body.put("message", message);
+        body.put("error", HttpStatus.BAD_REQUEST.getReasonPhrase());
+        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+    }
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<Map<String, String>> handleConstraintViolation(ConstraintViolationException ex) {
+        // Lay thong bao loi dau tien
+        String message = ex.getConstraintViolations().iterator().next().getMessage();
+        Map<String, String> body = new HashMap<>();
+        body.put("message", message);
+        body.put("error", HttpStatus.BAD_REQUEST.getReasonPhrase());
+        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
 }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import api from '../api';
 
 const Session = () => {
@@ -11,6 +11,24 @@ const Session = () => {
     const [courtFee, setCourtFee] = useState('');
     const [shuttlecockFee, setShuttlecockFee] = useState('');
 
+        const [inProgressSessions, setInProgressSessions] = useState([]);
+
+    const fetchSessions = async () => {
+        try {
+            const res = await api.get('/api/sessions/in-progress');
+            setInProgressSessions(res.data);
+            if (res.data.length > 0) {
+                setSessionId(res.data[0].id);
+            }
+        } catch (err) {
+            console.error('Lỗi khi tải buổi đánh:', err);
+        }
+    };
+
+    useEffect(() => {
+        fetchSessions();
+    }, []);
+
     const role = localStorage.getItem('role');
 
     const handleCreateSession = async (e) => {
@@ -20,6 +38,7 @@ const Session = () => {
             alert(`Tạo buổi đánh thành công! ID của buổi đánh là: ${res.data.id}`);
             setCourtName('');
             setSessionDate('');
+            fetchSessions();
         } catch (error) {
             console.error(error);
             alert('Lỗi tạo buổi đánh');
@@ -34,6 +53,7 @@ const Session = () => {
             setSessionId('');
             setCourtFee('');
             setShuttlecockFee('');
+            fetchSessions();
         } catch (error) {
             console.error(error);
             alert('Lỗi chốt sổ. Có thể bạn không phải Admin hoặc ID không hợp lệ.');
@@ -78,14 +98,19 @@ const Session = () => {
                     <form onSubmit={handleCloseSession}>
                         <div className="form-group">
                             <label className="form-label">ID Buổi Đánh</label>
-                            <input 
-                                type="number" 
+                                                        <select 
                                 className="form-input" 
                                 value={sessionId} 
                                 onChange={e => setSessionId(e.target.value)} 
-                                required 
-                                placeholder="Nhập ID (VD: 1, 2...)"
-                            />
+                                required
+                            >
+                                <option value="" disabled>-- Chọn buổi đánh --</option>
+                                {inProgressSessions.map(s => (
+                                    <option key={s.id} value={s.id}>
+                                        #{s.id} - {s.courtName} ({s.sessionDate})
+                                    </option>
+                                ))}
+                            </select>
                         </div>
                         <div className="form-group">
                             <label className="form-label">Tiền Sân (VNĐ)</label>

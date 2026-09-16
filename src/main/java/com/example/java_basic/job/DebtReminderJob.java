@@ -21,6 +21,8 @@ public class DebtReminderJob {
     // Chạy mỗi ngày vào lúc 8h sáng
 
 //    @Scheduled(cron = "0 * * * * *")
+//    @Scheduled(fixedDelay = 300000) chay 5 phut 1 lan
+//    @Scheduled(cron = "* */5 * * * *")
     @Scheduled(cron = "0 0 8 * * *")
     public void scanAndSendDebtReminders() {
         log.info("Bắt đầu quét danh sách thành viên nợ quỹ...");

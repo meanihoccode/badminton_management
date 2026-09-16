@@ -36,10 +36,7 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public void register(RegisterRequestDTO request) {
         String username = request.getUsername();
-        if (userRepository.findByUsername(username).isPresent()) {
-            String msg = messageSource.getMessage("error.username.exists", null, LocaleContextHolder.getLocale());
-            throw new IllegalArgumentException(msg);
-        }
+
 
         String roleStr = request.getRole() != null ? request.getRole().toUpperCase() : "MEMBER";
         Role roleEnum;

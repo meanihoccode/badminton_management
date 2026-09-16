@@ -5,11 +5,14 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import com.example.java_basic.enums.Role;
+import com.example.java_basic.validator.UniqueUsername;
+import com.example.java_basic.validator.UniqueEmail;
 
 @Data
 public class UserRequestDTO {
     @NotBlank(message = "{val.username.notblank}")
     @Size(min = 3, max = 20, message = "{val.username.size}")
+    @UniqueUsername
     private String username;
 
     // THÊM TRƯỜNG NÀY
@@ -20,6 +23,7 @@ public class UserRequestDTO {
     @NotBlank(message = "{val.email.notblank}")
     @Email(message = "{val.email.format}")
     @Size(max = 100, message = "{val.email.size}")
+    @UniqueEmail
     private String email;
 
     @NotBlank(message = "{val.fullname.notblank}")

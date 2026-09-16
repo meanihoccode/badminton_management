@@ -1,4 +1,5 @@
 package com.example.java_basic.service.impl;
+import com.example.java_basic.dto.projection.PlayerStatsProjection;
 import com.example.java_basic.service.*;
 
 import com.example.java_basic.dto.UserRequestDTO;
@@ -72,8 +73,9 @@ public class UserServiceImpl implements UserService {
         return userMapper.toDto(savedUser);
     }
 
-    public List<UserResponseDTO> getAllUsers(boolean isAdmin) {
-        return userRepository.findAll().stream().map(user -> {
+    public List<UserResponseDTO> getAllUsers(boolean isAdmin, String keyword) {
+        List<User> users = (keyword != null && !keyword.isEmpty()) ? userRepository.findByFullNameContainingIgnoreCaseOrUsernameContainingIgnoreCase(keyword, keyword) : userRepository.findAll();
+        return users.stream().map(user -> {
             UserResponseDTO dto = userMapper.toDto(user);
             if (!isAdmin) {
                 dto.setBalance(null);
@@ -115,7 +117,6 @@ public class UserServiceImpl implements UserService {
         return payDebt(userId, amount, "Thanh toán tiền công nợ / Nạp quỹ");
     }
 
-    @Transactional
     public UserResponseDTO payDebt(Long userId, BigDecimal amount, String note) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy thành viên có ID: " + userId));
@@ -162,9 +163,9 @@ public class UserServiceImpl implements UserService {
             .orElseThrow(() -> new IllegalArgumentException("User not found"));
         return userMapper.toDto(user);
     }
-    public PageResponseDTO<UserResponseDTO> getAllUsersPaged(boolean isAdmin, int page, int size) {
+    public PageResponseDTO<UserResponseDTO> getAllUsersPaged(boolean isAdmin, String keyword, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<User> userPage = userRepository.findAll(pageable);
+        Page<User> userPage = (keyword != null && !keyword.isEmpty()) ? userRepository.findByFullNameContainingIgnoreCaseOrUsernameContainingIgnoreCase(keyword, keyword, pageable) : userRepository.findAll(pageable);
         List<UserResponseDTO> content = userPage.getContent().stream().map(user -> {
             UserResponseDTO dto = userMapper.toDto(user);
             if (!isAdmin) {
@@ -181,12 +182,12 @@ public class UserServiceImpl implements UserService {
                 .build();
     }
 
-    public PageResponseDTO<TransactionResponseDTO> getMyTransactionsPaged(String username, int page, int size) {
+    public PageResponseDTO<TransactionResponseDTO> getMyTransactionsPaged(String username, java.time.LocalDate date, String type, int page, int size) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy User"));
 
         Pageable pageable = PageRequest.of(page, size);
-        Page<Transaction> txPage = transactionRepository.findByUserIdOrderByCreatedAtDesc(user.getId(), pageable);
+        Page<Transaction> txPage = transactionRepository.findByUserIdAndDateAndType(user.getId(), date, type, pageable);
         
         List<TransactionResponseDTO> content = txPage.getContent().stream()
                 .map(transactionMapper::toDto)
@@ -200,12 +201,12 @@ public class UserServiceImpl implements UserService {
                 .build();
     }
 
-    public PageResponseDTO<MatchHistoryResponseDTO> getMyMatchesPaged(String username, int page, int size) {
+    public PageResponseDTO<MatchHistoryResponseDTO> getMyMatchesPaged(String username, java.time.LocalDate date, int page, int size) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy User"));
 
         Pageable pageable = PageRequest.of(page, size);
-        Page<com.example.java_basic.entity.MatchParticipant> matchPage = matchParticipantRepository.findByUserId(user.getId(), pageable);
+        Page<com.example.java_basic.entity.MatchParticipant> matchPage = matchParticipantRepository.findByUserIdAndDate(user.getId(), date, pageable);
         
         List<MatchHistoryResponseDTO> content = matchPage.getContent().stream()
                 .map(matchHistoryMapper::toDto)
@@ -218,4 +219,7 @@ public class UserServiceImpl implements UserService {
                 .totalElements(matchPage.getTotalElements())
                 .build();
     }
+    public List<PlayerStatsProjection> getTopActivePlayers() {
+        return userRepository.getTopActivePlayers();
+    };
 }

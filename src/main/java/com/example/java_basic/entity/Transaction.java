@@ -1,5 +1,6 @@
 package com.example.java_basic.entity;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Positive;
 import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -19,6 +20,7 @@ public class Transaction extends AbstractBaseEntity {
     private User user;
 
     @Column(nullable = false)
+    @Positive(message = "Tiền phải > 0")
     private BigDecimal amount;
 
     @Enumerated(EnumType.STRING)

@@ -7,6 +7,7 @@ const Dashboard = () => {
     const role = localStorage.getItem('role');
     const [balance, setBalance] = useState(null);
     const [weather, setWeather] = useState(null);
+    
     const [leaderboard, setLeaderboard] = useState([]);
 
     useEffect(() => {
@@ -16,6 +17,15 @@ const Dashboard = () => {
                 setBalance(res.data.balance);
             } catch (err) {
                 console.error('Lỗi khi lấy thông tin', err);
+            }
+        };
+
+                const fetchQuote = async () => {
+            try {
+                const res = await api.get('/api/quote');
+                setQuote(res.data);
+            } catch (err) {
+                console.error(err);
             }
         };
 
@@ -46,6 +56,7 @@ const Dashboard = () => {
 
         fetchMe();
         fetchWeather();
+        
         fetchLeaderboard();
     }, []);
 
@@ -71,7 +82,7 @@ const Dashboard = () => {
                     </p>
                 </div>
 
-                {/* Weather Widget */}
+                                {/* Weather Widget */}
                 <div className="glass-card" style={{ background: 'linear-gradient(135deg, #e0f7fa 0%, #80deea 100%)' }}>
                     <h3 style={{ color: '#006064', marginBottom: '10px' }}>🌤️ Thời tiết Hà Nội</h3>
                     {weather ? (

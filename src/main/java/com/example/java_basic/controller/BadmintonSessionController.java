@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.math.BigDecimal;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/sessions")
@@ -34,5 +35,10 @@ public class BadmintonSessionController {
 
         sessionService.closeSession(sessionId, courtFee, shuttlecockFee);
         return ResponseEntity.ok("Chốt sổ buổi đánh thành công!");
+    }
+    // API lay danh sach cac buoi danh dang hoat dong
+    @GetMapping("/in-progress")
+    public ResponseEntity<List<SessionResponseDTO>> getInProgressSessions() {
+        return ResponseEntity.ok(sessionService.getInProgressSessions());
     }
 }

@@ -4,16 +4,53 @@ import api from '../api';
 const History = () => {
     const [transactions, setTransactions] = useState([]);
     const [matches, setMatches] = useState([]);
+    const [filterDate, setFilterDate] = useState('');
+    const [filterType, setFilterType] = useState('');
     const [txPage, setTxPage] = useState(0);
     const [txTotalPages, setTxTotalPages] = useState(1);
     const [matchPage, setMatchPage] = useState(0);
     const [matchTotalPages, setMatchTotalPages] = useState(1);
+    const renderPagination = (currentPage, totalPages, onPageChange) => {
+        if (totalPages <= 1) return null;
+        let pages = [];
+        let startPage = Math.max(0, currentPage - 2);
+        let endPage = Math.min(totalPages - 1, currentPage + 2);
+        
+        if (startPage > 0) pages.push(0);
+        if (startPage > 1) pages.push(-1);
+
+        for (let i = startPage; i <= endPage; i++) {
+            pages.push(i);
+        }
+
+        if (endPage < totalPages - 2) pages.push(-1);
+        if (endPage < totalPages - 1) pages.push(totalPages - 1);
+
+        return (
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '5px', marginTop: '20px', flexWrap: 'wrap' }}>
+                <button className="btn btn-secondary" disabled={currentPage === 0} onClick={() => onPageChange(currentPage - 1)}>&laquo;</button>
+                {pages.map((p, idx) => p === -1 ? (
+                    <span key={"dots-" + idx} style={{ padding: '5px 10px' }}>...</span>
+                ) : (
+                    <button 
+                        key={p} 
+                        className={currentPage === p ? 'btn btn-primary' : 'btn btn-secondary'} 
+                        onClick={() => onPageChange(p)}
+                        style={{ padding: '5px 10px', minWidth: '35px' }}
+                    >
+                        {p + 1}
+                    </button>
+                ))}
+                <button className="btn btn-secondary" disabled={currentPage >= totalPages - 1} onClick={() => onPageChange(currentPage + 1)}>&raquo;</button>
+            </div>
+        );
+    };
     const [activeTab, setActiveTab] = useState('transactions'); // 'transactions' or 'matches'
 
     useEffect(() => {
         const fetchTransactions = async () => {
             try {
-                const res = await api.get('/api/users/me/transactions?page=' + txPage + '&size=6');
+                const res = await api.get('/api/users/me/transactions?page=' + txPage + '&size=6' + (filterDate ? '&date=' + filterDate : '') + (filterType ? '&type=' + filterType : ''));
                 if (res.data.content) {
                     setTransactions(res.data.content);
                     setTxTotalPages(res.data.totalPages);
@@ -23,12 +60,12 @@ const History = () => {
             } catch (error) { console.error(error); }
         };
         if (activeTab === 'transactions') fetchTransactions();
-    }, [txPage, activeTab]);
+    }, [txPage, activeTab, filterDate, filterType]);
 
     useEffect(() => {
         const fetchMatches = async () => {
             try {
-                const res = await api.get('/api/users/me/matches?page=' + matchPage + '&size=6');
+                const res = await api.get('/api/users/me/matches?page=' + matchPage + '&size=6' + (filterDate ? '&date=' + filterDate : ''));
                 if (res.data.content) {
                     setMatches(res.data.content);
                     setMatchTotalPages(res.data.totalPages);
@@ -38,11 +75,40 @@ const History = () => {
             } catch (error) { console.error(error); }
         };
         if (activeTab === 'matches') fetchMatches();
-    }, [matchPage, activeTab]);
+    }, [matchPage, activeTab, filterDate]);
 
     return (
         <div className="animate-fade-in">
             <h2 className="page-title text-center">Lịch Sử Của Tôi</h2>
+
+                        <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', marginBottom: '20px' }}>
+                <input 
+                    type="date" 
+                    className="form-input" 
+                    style={{ maxWidth: '200px' }}
+                    value={filterDate}
+                    onChange={(e) => {
+                        setFilterDate(e.target.value);
+                        setTxPage(0);
+                        setMatchPage(0);
+                    }}
+                />
+                {activeTab === 'transactions' && (
+                    <select 
+                        className="form-input" 
+                        style={{ maxWidth: '200px' }}
+                        value={filterType}
+                        onChange={(e) => {
+                            setFilterType(e.target.value);
+                            setTxPage(0);
+                        }}
+                    >
+                        <option value="">Tất cả giao dịch</option>
+                        <option value="PLUS">Chỉ tiền cộng (+)</option>
+                        <option value="MINUS">Chỉ tiền trừ (-)</option>
+                    </select>
+                )}
+            </div>
 
             <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', marginBottom: '30px' }}>
                 <button 
@@ -103,13 +169,7 @@ const History = () => {
                             </tbody>
                         </table>
                     </div>
-                    {txTotalPages > 1 && (
-                        <div style={{ display: 'flex', justifyContent: 'center', gap: '15px', marginTop: '20px' }}>
-                            <button className="btn btn-secondary" disabled={txPage === 0} onClick={() => setTxPage(p => p - 1)}>Trang trước</button>
-                            <span style={{ alignSelf: 'center' }}>Trang {txPage + 1} / {txTotalPages}</span>
-                            <button className="btn btn-secondary" disabled={txPage >= txTotalPages - 1} onClick={() => setTxPage(p => p + 1)}>Trang sau</button>
-                        </div>
-                    )}
+                    {renderPagination(txPage, txTotalPages, setTxPage)}
                 </div>
             )}
 
@@ -146,13 +206,7 @@ const History = () => {
                             ))
                         )}
                     </div>
-                    {matchTotalPages > 1 && (
-                        <div style={{ display: 'flex', justifyContent: 'center', gap: '15px', marginTop: '20px' }}>
-                            <button className="btn btn-secondary" disabled={matchPage === 0} onClick={() => setMatchPage(p => p - 1)}>Trang trước</button>
-                            <span style={{ alignSelf: 'center' }}>Trang {matchPage + 1} / {matchTotalPages}</span>
-                            <button className="btn btn-secondary" disabled={matchPage >= matchTotalPages - 1} onClick={() => setMatchPage(p => p + 1)}>Trang sau</button>
-                        </div>
-                    )}
+                    {renderPagination(matchPage, matchTotalPages, setMatchPage)}
                 </div>
             )}
         </div>

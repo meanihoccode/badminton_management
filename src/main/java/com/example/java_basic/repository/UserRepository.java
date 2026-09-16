@@ -4,6 +4,8 @@ import com.example.java_basic.entity.User;
 import com.example.java_basic.dto.projection.PlayerStatsProjection;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import com.example.java_basic.dto.projection.UserSummaryProjection;
 import java.util.List;
@@ -26,4 +28,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     // Native Query: Lấy Top 5 người chơi tham gia nhiều trận đấu nhất
     @Query(value = "SELECT u.username, COUNT(mp.match_id) AS totalMatches FROM users u JOIN match_participants mp ON u.id = mp.user_id GROUP BY u.id ORDER BY totalMatches DESC LIMIT 5", nativeQuery = true)
     List<PlayerStatsProjection> getTopActivePlayers();
+    Page<User> findByFullNameContainingIgnoreCaseOrUsernameContainingIgnoreCase(String fullName, String username, Pageable pageable);
+    List<User> findByFullNameContainingIgnoreCaseOrUsernameContainingIgnoreCase(String fullName, String username);
 }

@@ -13,6 +13,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.stream.Collectors;
+import com.example.java_basic.enums.SessionStatus;
 import java.math.RoundingMode;
 import java.util.List;
 import java.util.Set;
@@ -83,7 +86,7 @@ public class BadmintonSessionServiceImpl implements BadmintonSessionService {
             // 3. Tính tiền chia đều (Tiền sân + Tiền cầu) / Số người
             SessionCostCalculator calculator = costCalculatorProvider.getObject();
             calculator.addCourtFee(totalCourtFee);
-            calculator.addWaterFee(shuttlecockFee);
+            calculator.addShuttlecockFee(shuttlecockFee);
             calculator.setPlayerCount(uniquePlayers.size());
             BigDecimal feePerPlayer = calculator.calculateCostPerPlayer();
 
@@ -104,6 +107,10 @@ public class BadmintonSessionServiceImpl implements BadmintonSessionService {
 
         sessionRepository.save(session);
     }
+    @Override
+    public List<SessionResponseDTO> getInProgressSessions() {
+        return sessionRepository.findByStatus(SessionStatus.OPEN).stream()
+                .map(sessionMapper::toDto)
+                .collect(Collectors.toList());
+    }
 }
-
-

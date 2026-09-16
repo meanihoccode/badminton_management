@@ -23,7 +23,7 @@ public class SessionCostCalculator {
         this.totalCost = this.totalCost.add(fee);
     }
 
-    public void addWaterFee(BigDecimal fee) {
+    public void addShuttlecockFee(BigDecimal fee) {
         this.totalCost = this.totalCost.add(fee);
     }
 

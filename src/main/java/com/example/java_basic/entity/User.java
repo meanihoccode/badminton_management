@@ -44,7 +44,7 @@ public class User extends AbstractBaseEntity implements UserDetails {
     private List<Transaction> transactions;
 
     // Quan hệ 1 User tham gia nhiều trận đấu
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MatchParticipant> matchParticipants;
 
     @Column(nullable = false)
