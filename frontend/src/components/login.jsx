@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import api from '../api';
 
 const Login = () => {
@@ -74,6 +74,9 @@ const Login = () => {
                         {isLoading ? 'Đang vào sân...' : 'Vào Sân'}
                     </button>
                 </form>
+                    <div className="text-center" style={{ marginTop: '15px' }}>
+                        <Link to="/register" style={{ color: 'var(--primary-color)', textDecoration: 'none', fontSize: '0.9rem' }}>Chưa có tài khoản? Đăng ký ngay</Link>
+                    </div>
             </div>
         </div>
     );

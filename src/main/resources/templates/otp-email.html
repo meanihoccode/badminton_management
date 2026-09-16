@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Mã OTP Xác Thực</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+        .otp-box { text-align: center; margin: 20px 0; }
+        .otp-code { font-size: 32px; font-weight: bold; letter-spacing: 5px; color: #0056b3; background: #f4f4f4; padding: 15px 30px; border-radius: 8px; display: inline-block; }
+        .footer { margin-top: 30px; font-size: 12px; color: #888; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Xin chào <span th:text="${fullName}">Bạn</span>,</h2>
+        <p>Cảm ơn bạn đã đăng ký tài khoản tại hệ thống Quản lý Sân Cầu Lông.</p>
+        <p>Để hoàn tất quá trình đăng ký, vui lòng nhập mã OTP dưới đây. Mã này có hiệu lực trong vòng <strong>5 phút</strong>:</p>
+        
+        <div class="otp-box">
+            <span class="otp-code" th:text="${otpCode}">123456</span>
+        </div>
+        
+        <p>Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email này.</p>
+        <p>Trân trọng,<br>Ban Quản Trị Hệ Thống</p>
+        
+        <div class="footer">
+            Đây là email tự động. Vui lòng không trả lời email này.
+        </div>
+    </div>
+</body>
+</html>

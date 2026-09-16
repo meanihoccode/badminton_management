@@ -1,28 +1,31 @@
 package com.example.java_basic.service.impl;
 
-import com.example.java_basic.dto.AuthResponseDTO;
-import com.example.java_basic.dto.LoginRequestDTO;
-import com.example.java_basic.dto.RegisterRequestDTO;
+import com.example.java_basic.dto.*;
 import com.example.java_basic.entity.User;
 import com.example.java_basic.repository.UserRepository;
 import com.example.java_basic.security.JwtService;
 import com.example.java_basic.service.AuthService;
+import com.example.java_basic.service.EmailService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.context.MessageSource;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.Random;
 import com.example.java_basic.enums.Role;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
@@ -30,14 +33,74 @@ public class AuthServiceImpl implements AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
-    private final MessageSource messageSource;
+    private final EmailService emailService;
+    private final CacheManager cacheManager;
 
     @Override
     @Transactional
     public void register(RegisterRequestDTO request) {
-        String username = request.getUsername();
+        saveUserToDb(request);
+    }
 
+    @Override
+    public void initiateRegistration(RegisterRequestDTO request) {
+        // Validate is already done by @Valid in Controller
+        if (userRepository.existsByUsername(request.getUsername())) {
+            throw new IllegalArgumentException("Username đã tồn tại");
+        }
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new IllegalArgumentException("Email đã tồn tại");
+        }
 
+        // Generate 6-digit OTP
+        String otpCode = String.format("%06d", new Random().nextInt(999999));
+        
+        OtpSessionData sessionData = OtpSessionData.builder()
+                .userData(request)
+                .otpCode(otpCode)
+                .expiryTime(LocalDateTime.now().plusMinutes(5))
+                .build();
+
+        // Save to cache
+        Cache cache = cacheManager.getCache("otpCache");
+        if (cache != null) {
+            cache.put(request.getEmail(), sessionData);
+        }
+
+        // Send Email via JMS
+        emailService.sendOtpEmail(request.getEmail(), request.getFullName(), otpCode);
+        log.info("Da khoi tao OTP dang ky cho email: {}", request.getEmail());
+    }
+
+    @Override
+    @Transactional
+    public void verifyRegistration(OtpVerifyRequestDTO request) {
+        Cache cache = cacheManager.getCache("otpCache");
+        if (cache == null) {
+            throw new IllegalArgumentException("Hệ thống cache đang lỗi");
+        }
+
+        OtpSessionData sessionData = cache.get(request.getEmail(), OtpSessionData.class);
+        if (sessionData == null) {
+            throw new IllegalArgumentException("Mã OTP đã hết hạn hoặc email không chính xác");
+        }
+
+        if (!sessionData.getOtpCode().equals(request.getOtp())) {
+            throw new IllegalArgumentException("Mã OTP không hợp lệ");
+        }
+
+        if (sessionData.getExpiryTime().isBefore(LocalDateTime.now())) {
+            cache.evict(request.getEmail());
+            throw new IllegalArgumentException("Mã OTP đã hết hạn");
+        }
+
+        // All good -> Save user
+        saveUserToDb(sessionData.getUserData());
+        cache.evict(request.getEmail()); // Xóa cache sau khi dùng
+        log.info("Xac thuc OTP thanh cong, da tao user cho email: {}", request.getEmail());
+    }
+
+    private void saveUserToDb(RegisterRequestDTO request) {
         String roleStr = request.getRole() != null ? request.getRole().toUpperCase() : "MEMBER";
         Role roleEnum;
         try {
@@ -47,7 +110,7 @@ public class AuthServiceImpl implements AuthService {
         }
 
         User user = User.builder()
-                .username(username)
+                .username(request.getUsername())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .fullName(request.getFullName())
                 .email(request.getEmail())
@@ -61,20 +124,12 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public AuthResponseDTO login(LoginRequestDTO request) {
-        String username = request.getUsername();
-        String password = request.getPassword();
-
-        // Xác thực tài khoản
         authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(username, password)
+                new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
         );
-
-        // Sinh token
-        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+        UserDetails userDetails = userDetailsService.loadUserByUsername(request.getUsername());
         String token = jwtService.generateToken(userDetails);
-        
-        String role = userDetails.getAuthorities().iterator().next().getAuthority(); // VD: ROLE_ADMIN
-        
+        String role = userDetails.getAuthorities().iterator().next().getAuthority();
         return AuthResponseDTO.builder()
                 .token(token)
                 .username(userDetails.getUsername())
@@ -82,4 +137,3 @@ public class AuthServiceImpl implements AuthService {
                 .build();
     }
 }
-

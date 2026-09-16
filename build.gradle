@@ -54,11 +54,15 @@ dependencies {
     testImplementation 'org.springframework.security:spring-security-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
-    // 7. Messaging (JMS & ActiveMQ Artemis)
+        // 7. Messaging (JMS & ActiveMQ Artemis)
     implementation 'org.springframework.boot:spring-boot-starter-artemis'
     implementation 'org.apache.activemq:artemis-server'
     implementation 'org.apache.activemq:artemis-jms-server'
     implementation 'org.apache.activemq:artemis-jakarta-server'
+
+    // 8. Caching (Caffeine Cache for OTP)
+    implementation 'org.springframework.boot:spring-boot-starter-cache'
+    implementation 'com.github.ben-manes.caffeine:caffeine'
 }
 
 tasks.named('test') {

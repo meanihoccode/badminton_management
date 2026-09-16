@@ -30,4 +30,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<PlayerStatsProjection> getTopActivePlayers();
     Page<User> findByFullNameContainingIgnoreCaseOrUsernameContainingIgnoreCase(String fullName, String username, Pageable pageable);
     List<User> findByFullNameContainingIgnoreCaseOrUsernameContainingIgnoreCase(String fullName, String username);
+
+    boolean existsByUsername(String username);
+    boolean existsByEmail(String email);
 }

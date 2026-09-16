@@ -15,7 +15,9 @@ import java.math.BigDecimal;
 public class EmailMessageDTO implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    private String to;
+        private String to;
     private String fullName;
     private BigDecimal debtAmount;
+    private String type; // DEBT_REMINDER or OTP_VERIFY
+    private String otpCode;
 }

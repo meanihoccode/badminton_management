@@ -27,9 +27,22 @@ public class EmailServiceImpl implements EmailService {
                 .to(to)
                 .fullName(fullName)
                 .debtAmount(debtAmount)
+                .type("DEBT_REMINDER")
                 .build();
 
         jmsTemplate.convertAndSend("emailQueue", message);
         log.info("Da day yeu cau gui email vao Queue cho {}", to);
+    }
+    
+    @Override
+    public void sendOtpEmail(String to, String fullName, String otpCode) {
+        EmailMessageDTO message = EmailMessageDTO.builder()
+                .to(to)
+                .fullName(fullName)
+                .type("OTP_VERIFY")
+                .otpCode(otpCode)
+                .build();
+        jmsTemplate.convertAndSend("emailQueue", message);
+        log.info("Da day yeu cau gui OTP vao Queue cho {}", to);
     }
 }
