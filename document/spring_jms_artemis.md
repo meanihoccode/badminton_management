@@ -2,6 +2,8 @@
 
 Tài liệu này tổng hợp lại kiến thức và các bước thực hành để tích hợp hệ thống hàng đợi thông điệp (Message Queue) vào dự án Spring Boot, sử dụng **Java Message Service (JMS)** với Broker là **ActiveMQ Artemis** (chạy ở chế độ nhúng - Embedded).
 
+*Ghi chú: Dưới đây là cấu trúc các file thực tế đã áp dụng trong dự án này để bạn tiện tra cứu lại.*
+
 ## 1. Tại sao lại dùng JMS thay vì @Async?
 
 Trước đây, hệ thống gửi Email bằng cách dùng Annotation @Async. Phương pháp này tạo ra một luồng (thread) mới trên RAM để chạy ngầm. Tuy nhiên, nó có một nhược điểm chí mạng:
@@ -13,8 +15,9 @@ Trước đây, hệ thống gửi Email bằng cách dùng Annotation @Async. P
 ## 2. Các Bước Cài Đặt
 
 ### Bước 1: Khai báo thư viện (Dependencies)
-Trong file uild.gradle, thêm các thư viện của Artemis:
+**File áp dụng:** uild.gradle
 
+Thêm các thư viện của Artemis:
 `gradle
 // Thư viện JMS cơ bản của Spring Boot
 implementation 'org.springframework.boot:spring-boot-starter-artemis'
@@ -25,7 +28,9 @@ implementation 'org.apache.activemq:artemis-jms-server'
 implementation 'org.apache.activemq:artemis-jakarta-server'
 `
 
-### Bước 2: Cấu hình pplication.properties
+### Bước 2: Cấu hình hệ thống
+**File áp dụng:** src/main/resources/application.properties
+
 `properties
 # Bật chế độ chạy nhúng (không cần cài phần mềm ActiveMQ bên ngoài)
 spring.artemis.mode=embedded
@@ -38,7 +43,9 @@ spring.artemis.packages.trust-all=true
 `
 
 ### Bước 3: Kích hoạt JMS
-Vào class chạy chính (thường là ...Application.java), thêm Annotation @EnableJms:
+**File áp dụng:** src/main/java/com/example/java_basic/JavaBasicApplication.java
+
+Vào class chạy chính, thêm Annotation @EnableJms:
 `java
 @SpringBootApplication
 @EnableJms // Thêm dòng này
@@ -54,6 +61,8 @@ public class JavaBasicApplication {
 ## 3. Cách Sử Dụng (Mô hình Producer - Consumer)
 
 ### 3.1. DTO (Data Transfer Object)
+**File áp dụng:** src/main/java/com/example/java_basic/dto/EmailMessageDTO.java
+
 Tạo một Class đại diện cho "Phong bì thư" chứa dữ liệu.
 **Lưu ý:** Bắt buộc phải implements Serializable thì mới truyền qua mạng / lưu vào Queue được.
 `java
@@ -68,6 +77,8 @@ public class EmailMessageDTO implements Serializable {
 `
 
 ### 3.2. Producer (Người gửi thông điệp)
+**File áp dụng:** src/main/java/com/example/java_basic/service/impl/EmailServiceImpl.java
+
 Sử dụng công cụ JmsTemplate do Spring Boot cung cấp để ném "Phong bì" vào Queue.
 `java
 @Service
@@ -94,6 +105,8 @@ public class EmailServiceImpl implements EmailService {
 `
 
 ### 3.3. Consumer (Người nhận thông điệp)
+**File áp dụng:** src/main/java/com/example/java_basic/listener/EmailMessageListener.java
+
 Tạo một Component riêng biệt, gắn Annotation @JmsListener. Spring Boot sẽ tự động tạo một luồng chạy ngầm (Worker), liên tục theo dõi Queue này. Hễ có phong bì rơi vào, nó sẽ lấy ra xử lý.
 `java
 @Component
