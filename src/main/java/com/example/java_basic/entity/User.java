@@ -34,6 +34,7 @@ public class User extends AbstractBaseEntity implements UserDetails {
     private Role role; // ADMIN, MEMBER
 
     @Column(nullable = false)
+    @Builder.Default
     private BigDecimal balance = BigDecimal.ZERO;
 
     @Column(name = "racket_model")

@@ -27,7 +27,10 @@ public class Transaction extends AbstractBaseEntity {
     @Column(name = "transaction_type", nullable = false)
     private TransactionType transactionType; // MATCH_FEE, DEPOSIT
 
-    private String description;
+        private String description;
+
+    @Column(name = "external_ref", unique = true)
+    private String externalRef; // Luu transactionId tu webhook de chong trung
 
     @Column(columnDefinition = "TEXT")
     private String receipt;

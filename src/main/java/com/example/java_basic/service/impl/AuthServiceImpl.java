@@ -130,8 +130,10 @@ public class AuthServiceImpl implements AuthService {
         UserDetails userDetails = userDetailsService.loadUserByUsername(request.getUsername());
         String token = jwtService.generateToken(userDetails);
         String role = userDetails.getAuthorities().iterator().next().getAuthority();
+        User userEntity = userRepository.findByUsername(userDetails.getUsername()).orElseThrow();
         return AuthResponseDTO.builder()
                 .token(token)
+                .id(userEntity.getId())
                 .username(userDetails.getUsername())
                 .role(role)
                 .build();

@@ -7,8 +7,12 @@ const Dashboard = () => {
     const role = localStorage.getItem('role');
     const [balance, setBalance] = useState(null);
     const [weather, setWeather] = useState(null);
-    
     const [leaderboard, setLeaderboard] = useState([]);
+    const [showTopup, setShowTopup] = useState(false);
+    const [topupAmount, setTopupAmount] = useState('');
+    const [initialBalance, setInitialBalance] = useState(null);
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [successAmount, setSuccessAmount] = useState(0);
 
     useEffect(() => {
         const fetchMe = async () => {
@@ -20,23 +24,12 @@ const Dashboard = () => {
             }
         };
 
-                const fetchQuote = async () => {
-            try {
-                const res = await api.get('/api/quote');
-                setQuote(res.data);
-            } catch (err) {
-                console.error(err);
-            }
-        };
-
         const fetchWeather = async () => {
             try {
-                // Because Weather API might not need auth, but api wrapper adds token.
                 const res = await api.get('/api/weather');
                 if (res.data && res.data.current_weather) {
                     setWeather(res.data.current_weather);
                 } else if (typeof res.data === 'string') {
-                    // Fallback in case it was escaped
                     const parsed = JSON.parse(res.data);
                     setWeather(parsed.current_weather);
                 }
@@ -56,17 +49,32 @@ const Dashboard = () => {
 
         fetchMe();
         fetchWeather();
-        
         fetchLeaderboard();
     }, []);
 
+    // Kiem tra URL sau khi tu PayOS tra ve
+    useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('code');
+        const status = urlParams.get('status');
+        const cancel = urlParams.get('cancel');
+        
+        if (code === '00' && status === 'PAID' && cancel === 'false') {
+            // Thanh toan thanh cong
+            setShowSuccessModal(true);
+            setSuccessAmount("thành công");
+            
+            // Xoa params khoi URL de ko bi hien lai khi F5
+            window.history.replaceState(null, '', window.location.pathname);
+        }
+    }, []);
+
     const getWeatherIcon = (code) => {
-        console.log(weather);
         if (code === 0) return '☀️ Trời trong xanh';
-        if (code === 1 || code === 2 || code === 3) return '⛅ Có mây';
+        if (code === 1 || code === 2 || code === 3) return '🌤️ Có mây';
         if (code >= 51 && code <= 67) return '🌧️ Có mưa';
         if (code >= 95) return '⛈️ Sấm chớp';
-        return '🌥️ Âm u';
+        return '☁️ Âm u';
     };
 
     return (
@@ -74,17 +82,24 @@ const Dashboard = () => {
             <h1 className="page-title text-center">Chào mừng đến với Sân Cầu Lông</h1>
             
             <div className="grid-2 mt-8">
-                {/* Balance Card */}
-                <div className="glass-card">
-                    <h3 style={{ color: 'var(--success-color, #10b981)', marginBottom: '10px' }}>Số dư hiện tại</h3>
-                    <p style={{ color: balance < 0 ? 'var(--danger-color)' : 'var(--success-color)', fontSize: '1.5rem', fontWeight: 'bold' }}>
-                        {balance !== null ? balance.toLocaleString() + ' VND' : 'Đang tải...'}
-                    </p>
+                {/* Balance Card with Top-up Button */}
+                <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div>
+                            <h3 style={{ color: 'var(--success-color, #10b981)', marginBottom: '10px' }}>Số dư hiện tại</h3>
+                            <p style={{ color: balance < 0 ? 'var(--danger-color)' : 'var(--success-color)', fontSize: '1.5rem', fontWeight: 'bold' }}>
+                                {balance !== null ? balance.toLocaleString() + ' VND' : 'Đang tải...'}
+                            </p>
+                        </div>
+                        <button onClick={() => { setShowTopup(true); setInitialBalance(balance); }} className="btn btn-success" style={{ padding: '10px 20px', borderRadius: '8px' }}>
+                            + Nạp Tiền
+                        </button>
+                    </div>
                 </div>
 
-                                {/* Weather Widget */}
+                {/* Weather Widget */}
                 <div className="glass-card" style={{ background: 'linear-gradient(135deg, #e0f7fa 0%, #80deea 100%)' }}>
-                    <h3 style={{ color: '#006064', marginBottom: '10px' }}>🌤️ Thời tiết Hà Nội</h3>
+                    <h3 style={{ color: '#006064', marginBottom: '10px' }}>🌦️ Thời tiết Hà Nội</h3>
                     {weather ? (
                         <div>
                             <p style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#004d40' }}>
@@ -100,7 +115,7 @@ const Dashboard = () => {
 
             {/* Leaderboard */}
             <div className="mt-8">
-                <h3 style={{ color: 'var(--primary-color)', marginBottom: '15px' }}>Bảng Xếp Hạng Năng Nổ (Top 5)</h3>
+                <h3 style={{ color: 'var(--primary-color)', marginBottom: '15px' }}>Bảng Xếp Hạng Siêng Năng (Top 5)</h3>
                 <div className="glass-card">
                     {leaderboard.length > 0 ? (
                         <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse' }}>
@@ -156,6 +171,74 @@ const Dashboard = () => {
                     </>
                 )}
             </div>
+
+            {/* Top-up Modal */}
+            {showTopup && (
+                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
+                    <div className="glass-panel" style={{ width: '400px', backgroundColor: 'white', padding: '20px', borderRadius: '12px' }}>
+                        <h3 className="text-center" style={{ color: 'var(--primary-color)', marginBottom: '20px' }}>Nạp Tiền Tự Động (VietQR)</h3>
+                        
+                        <div className="form-group">
+                            <label className="form-label">Nhập số tiền muốn nạp (VND)</label>
+                            <input 
+                                type="number" 
+                                className="form-input" 
+                                value={topupAmount} 
+                                onChange={(e) => setTopupAmount(e.target.value)} 
+                                placeholder="Ví dụ: 100000"
+                            />
+                        </div>
+
+                        {topupAmount > 0 && (
+                            <div className="text-center mt-4">
+                                <button 
+                                    onClick={async () => {
+                                        try {
+                                            const res = await api.post('/api/payments/create', { 
+                                                amount: topupAmount,
+                                                returnUrl: window.location.href
+                                            });
+                                            window.location.href = res.data.checkoutUrl;
+                                        } catch (err) {
+                                            alert("Lỗi tạo mã thanh toán");
+                                        }
+                                    }} 
+                                    className="btn btn-success" style={{ width: '100%', padding: '12px' }}
+                                >
+                                    Thanh Toán Qua PayOS
+                                </button>
+                            </div>
+                        )}
+
+                        <div className="text-center mt-3">
+                            <button onClick={() => { setShowTopup(false); setTopupAmount(''); }} className="btn" style={{ background: '#ddd', color: '#333', width: '100%' }}>
+                                Đóng
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Success Modal */}
+            {showSuccessModal && (
+                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1100 }}>
+                    <div className="glass-panel" style={{ width: '380px', backgroundColor: 'white', padding: '30px', borderRadius: '16px', textAlign: 'center', animation: 'fadeIn 0.3s ease-out' }}>
+                        <div style={{ width: '70px', height: '70px', borderRadius: '50%', backgroundColor: '#d1fae5', display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '0 auto 20px' }}>
+                            <span style={{ color: '#10b981', fontSize: '40px' }}>✓</span>
+                        </div>
+                        <h2 style={{ color: '#10b981', marginBottom: '15px', fontWeight: 'bold' }}>Thành Công!</h2>
+                        <p style={{ color: '#4b5563', fontSize: '1.1rem', marginBottom: '25px', lineHeight: '1.6' }}>
+                            Hệ thống đã ghi nhận số dư của bạn được cập nhật. <br/>
+                        </p>
+                        <button onClick={() => {
+                            setShowSuccessModal(false);
+                            window.location.reload();
+                        }} className="btn btn-success" style={{ width: '100%', padding: '12px', borderRadius: '10px', fontSize: '1.1rem', fontWeight: 'bold' }}>
+                            Tuyệt vời
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

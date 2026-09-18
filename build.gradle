@@ -19,6 +19,7 @@ repositories {
 }
 
 dependencies {
+    implementation 'vn.payos:payos-java:2.0.1'
     // 1. Core & Web (Xây dựng RESTful API Controller)
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.springframework.boot:spring-boot-starter-web'

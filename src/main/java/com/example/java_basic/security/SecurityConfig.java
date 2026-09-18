@@ -37,7 +37,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Mở cửa cho API đăng nhập/đăng ký
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/api/auth/**", "/error").permitAll()
+                        .requestMatchers("/api/auth/**", "/error", "/api/payments/webhook").permitAll()
                         // API quản lý (tạo buổi, chốt sổ, ghi điểm, nộp tiền, thêm thành viên) chỉ dành cho ADMIN
                         .requestMatchers(HttpMethod.POST, "/api/sessions").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/matches/record").hasRole("ADMIN")

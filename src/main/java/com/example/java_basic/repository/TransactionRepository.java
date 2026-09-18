@@ -18,4 +18,6 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     Page<Transaction> findByUserIdAndDate(@Param("userId") Long userId, @Param("date") LocalDate date, Pageable pageable);
     @Query("SELECT t FROM Transaction t WHERE t.user.id = :userId AND (:date IS NULL OR FUNCTION('DATE', t.createdAt) = :date) AND (:type IS NULL OR (:type = 'PLUS' AND t.amount > 0) OR (:type = 'MINUS' AND t.amount < 0)) ORDER BY t.createdAt DESC")
     Page<Transaction> findByUserIdAndDateAndType(@Param("userId") Long userId, @Param("date") LocalDate date, @Param("type") String type, Pageable pageable);
+
+    boolean existsByExternalRef(String externalRef);
 }
