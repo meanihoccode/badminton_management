@@ -21,7 +21,11 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Random;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import com.example.java_basic.enums.Role;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.StringRedisTemplate;
 
 @Service
 @RequiredArgsConstructor
@@ -35,6 +39,10 @@ public class AuthServiceImpl implements AuthService {
     private final UserDetailsService userDetailsService;
     private final EmailService emailService;
     private final CacheManager cacheManager;
+    private final StringRedisTemplate redisTemplate;
+
+    @Value("${jwt.refresh.expiration:604800000}")
+    private long refreshExpiration;
 
     @Override
     @Transactional
@@ -129,10 +137,55 @@ public class AuthServiceImpl implements AuthService {
         );
         UserDetails userDetails = userDetailsService.loadUserByUsername(request.getUsername());
         String token = jwtService.generateToken(userDetails);
+        
+        // Generate and save Refresh Token
+        String refreshToken = UUID.randomUUID().toString();
+        redisTemplate.opsForValue().set(
+                refreshToken, 
+                userDetails.getUsername(), 
+                refreshExpiration, 
+                TimeUnit.MILLISECONDS
+        );
+
         String role = userDetails.getAuthorities().iterator().next().getAuthority();
         User userEntity = userRepository.findByUsername(userDetails.getUsername()).orElseThrow();
         return AuthResponseDTO.builder()
                 .token(token)
+                .refreshToken(refreshToken)
+                .id(userEntity.getId())
+                .username(userDetails.getUsername())
+                .role(role)
+                .build();
+    }
+
+    @Override
+    public AuthResponseDTO refreshToken(RefreshTokenRequestDTO request) {
+        String requestRefreshToken = request.getRefreshToken();
+        String username = redisTemplate.opsForValue().get(requestRefreshToken);
+
+        if (username == null) {
+            throw new IllegalArgumentException("Refresh token is invalid or expired!");
+        }
+
+        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+        String token = jwtService.generateToken(userDetails);
+        
+        // Rotate Refresh Token
+        redisTemplate.delete(requestRefreshToken);
+        String newRefreshToken = UUID.randomUUID().toString();
+        redisTemplate.opsForValue().set(
+                newRefreshToken, 
+                userDetails.getUsername(), 
+                refreshExpiration, 
+                TimeUnit.MILLISECONDS
+        );
+
+        String role = userDetails.getAuthorities().iterator().next().getAuthority();
+        User userEntity = userRepository.findByUsername(userDetails.getUsername()).orElseThrow();
+        
+        return AuthResponseDTO.builder()
+                .token(token)
+                .refreshToken(newRefreshToken)
                 .id(userEntity.getId())
                 .username(userDetails.getUsername())
                 .role(role)

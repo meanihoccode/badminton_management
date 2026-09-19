@@ -27,18 +27,41 @@ api.interceptors.response.use(
     (response) => {
         return response;
     },
-    (error) => {
-        if (error.response && (error.response.status === 401 || error.response.status === 403)) {
-            // Nếu lỗi 401 (Unauthorized) hoặc 403 (Forbidden)
-            const token = localStorage.getItem('token');
-            if (token) {
-                // Chỉ thông báo nếu trước đó có token (nghĩa là token bị hết hạn)
-                alert('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!');
-                localStorage.removeItem('token');
-                localStorage.removeItem('username');
-                window.location.href = '/login';
+    async (error) => {
+        const originalRequest = error.config;
+
+        if (error.response && error.response.status === 401 && !originalRequest._retry) {
+            originalRequest._retry = true;
+            
+            try {
+                const refreshToken = localStorage.getItem('refreshToken');
+                if (refreshToken) {
+                    // Gọi API refresh token
+                    const response = await axios.post('http://localhost:8080/api/auth/refresh', {
+                        refreshToken: refreshToken
+                    });
+
+                    // Lưu token mới
+                    localStorage.setItem('token', response.data.token);
+                    localStorage.setItem('refreshToken', response.data.refreshToken);
+
+                    // Cập nhật header và gọi lại API cũ
+                    originalRequest.headers['Authorization'] = `Bearer ${response.data.token}`;
+                    return api(originalRequest);
+                }
+            } catch (refreshError) {
+                // Nếu refresh token cũng lỗi (hết hạn 7 ngày) thì mới logout
+                console.error("Refresh token failed", refreshError);
             }
+
+            // Xoá trắng local storage và đẩy về trang đăng nhập nếu mọi cách đều thất bại
+            localStorage.removeItem('token');
+            localStorage.removeItem('refreshToken');
+            localStorage.removeItem('username');
+            alert('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!');
+            window.location.href = '/login';
         }
+        
         return Promise.reject(error);
     }
 );
