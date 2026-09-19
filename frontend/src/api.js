@@ -22,6 +22,18 @@ api.interceptors.request.use(
     }
 );
 
+let isRefreshing = false;
+let refreshSubscribers = [];
+
+const subscribeTokenRefresh = (cb) => {
+    refreshSubscribers.push(cb);
+};
+
+const onRefreshed = (token) => {
+    refreshSubscribers.map(cb => cb(token));
+    refreshSubscribers = [];
+};
+
 // Interceptor: Xử lý lỗi trả về từ Backend (ví dụ: Token hết hạn)
 api.interceptors.response.use(
     (response) => {
@@ -33,33 +45,56 @@ api.interceptors.response.use(
         if (error.response && error.response.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
             
-            try {
-                const refreshToken = localStorage.getItem('refreshToken');
-                if (refreshToken) {
-                    // Gọi API refresh token
-                    const response = await axios.post('http://localhost:8080/api/auth/refresh', {
-                        refreshToken: refreshToken
+            const refreshToken = localStorage.getItem('refreshToken');
+            
+            if (refreshToken) {
+                if (!isRefreshing) {
+                    isRefreshing = true;
+                    try {
+                        // Gọi API refresh token
+                        const response = await axios.post('http://localhost:8080/api/auth/refresh', {
+                            refreshToken: refreshToken
+                        });
+
+                        // Lưu token mới
+                        const newToken = response.data.token;
+                        localStorage.setItem('token', newToken);
+                        localStorage.setItem('refreshToken', response.data.refreshToken);
+
+                        isRefreshing = false;
+                        onRefreshed(newToken);
+
+                        // Cập nhật header và gọi lại API cũ
+                        originalRequest.headers['Authorization'] = `Bearer ${newToken}`;
+                        return api(originalRequest);
+                    } catch (refreshError) {
+                        isRefreshing = false;
+                        console.error("Refresh token failed", refreshError);
+                        // Xoá trắng local storage và đẩy về trang đăng nhập nếu refresh thất bại
+                        localStorage.removeItem('token');
+                        localStorage.removeItem('refreshToken');
+                        localStorage.removeItem('username');
+                        alert('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!');
+                        window.location.href = '/login';
+                        return Promise.reject(refreshError);
+                    }
+                } else {
+                    // Đang trong quá trình refresh, đưa request này vào hàng chờ
+                    return new Promise((resolve) => {
+                        subscribeTokenRefresh((newToken) => {
+                            originalRequest.headers['Authorization'] = `Bearer ${newToken}`;
+                            resolve(api(originalRequest));
+                        });
                     });
-
-                    // Lưu token mới
-                    localStorage.setItem('token', response.data.token);
-                    localStorage.setItem('refreshToken', response.data.refreshToken);
-
-                    // Cập nhật header và gọi lại API cũ
-                    originalRequest.headers['Authorization'] = `Bearer ${response.data.token}`;
-                    return api(originalRequest);
                 }
-            } catch (refreshError) {
-                // Nếu refresh token cũng lỗi (hết hạn 7 ngày) thì mới logout
-                console.error("Refresh token failed", refreshError);
+            } else {
+                // Không có refresh token
+                localStorage.removeItem('token');
+                localStorage.removeItem('refreshToken');
+                localStorage.removeItem('username');
+                alert('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!');
+                window.location.href = '/login';
             }
-
-            // Xoá trắng local storage và đẩy về trang đăng nhập nếu mọi cách đều thất bại
-            localStorage.removeItem('token');
-            localStorage.removeItem('refreshToken');
-            localStorage.removeItem('username');
-            alert('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!');
-            window.location.href = '/login';
         }
         
         return Promise.reject(error);

@@ -17,6 +17,7 @@ const Login = () => {
         try {
             const response = await api.post('/api/auth/login', { username, password });
             localStorage.setItem('token', response.data.token);
+            localStorage.setItem('refreshToken', response.data.refreshToken);
             localStorage.setItem('role', response.data.role);
             localStorage.setItem('username', response.data.username);
             localStorage.setItem('id', response.data.id);
