@@ -6,3 +6,19 @@ Thiếu các nội dung sau:
     -Projection
     -@Async
     -multilanguage
+
+
+.\gradlew bootRun
+
+cd frontend
+npm run dev
+
+./ngrok http 8080
+
+
+test reids
+PS C:\Users\Admin> & "C:\Program Files\Redis\redis-cli.exe"
+127.0.0.1:6379> KEYS *
+
+làm nút resend OTP
+export excel

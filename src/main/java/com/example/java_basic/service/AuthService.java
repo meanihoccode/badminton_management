@@ -5,6 +5,7 @@ import com.example.java_basic.dto.RegisterRequestDTO;
 import com.example.java_basic.dto.AuthResponseDTO;
 import com.example.java_basic.dto.OtpVerifyRequestDTO;
 import com.example.java_basic.dto.RefreshTokenRequestDTO;
+import jakarta.validation.Valid;
 
 public interface AuthService {
     void register(RegisterRequestDTO request); // Old method, maybe remove later
@@ -12,4 +13,6 @@ public interface AuthService {
     void verifyRegistration(OtpVerifyRequestDTO request);
     AuthResponseDTO login(LoginRequestDTO request);
     AuthResponseDTO refreshToken(RefreshTokenRequestDTO request);
+
+    void resendOTP(@Valid String email);
 }

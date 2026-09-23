@@ -81,6 +81,21 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    public void resendOTP(String email) {
+        Cache cache = cacheManager.getCache("otpCache");
+        OtpSessionData session = cache.get(email, OtpSessionData.class);
+        if (session == null) {
+            throw new IllegalArgumentException("Phiên đăng ký đã hết hạn, vui lòng đăng ký lại.");
+        }
+        String otpCode = String.format("%06d", new Random().nextInt(999999));
+        session.setOtpCode(otpCode);
+        session.setExpiryTime(LocalDateTime.now().plusMinutes(5));
+        cache.put(email, session);
+        emailService.sendOtpEmail(email, session.getUserData().getFullName(), otpCode);
+        log.info("Da gui lai OTP dang ky cho email: {}", email);
+    }
+
+    @Override
     @Transactional
     public void verifyRegistration(OtpVerifyRequestDTO request) {
         Cache cache = cacheManager.getCache("otpCache");
@@ -142,7 +157,7 @@ public class AuthServiceImpl implements AuthService {
         String refreshToken = UUID.randomUUID().toString();
         redisTemplate.opsForValue().set(
                 refreshToken, 
-                userDetails.getUsername(), 
+                userDetails.getUsername(),
                 refreshExpiration, 
                 TimeUnit.MILLISECONDS
         );

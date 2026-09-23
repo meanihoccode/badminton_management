@@ -14,15 +14,17 @@ import java.util.function.Function;
 @Service
 public class JwtService {
 
-    // Lấy chuỗi secret từ file application.properties, nếu không có sẽ lấy chuỗi mặc định phía sau dấu hai chấm
+    // Lấy chuỗi secret từ file application.properties, nếu không có sẽ lấy chuỗi
+    // mặc định phía sau dấu hai chấm
     @Value("${jwt.secret:DayLaMotChuoiBiMatSieuDaiCuaHeThongQuanLyCauLongCanPhaiBaoMatTuyetDoi}")
     private String secretKey;
 
     public String generateToken(UserDetails userDetails) {
         return Jwts.builder()
+                .id(java.util.UUID.randomUUID().toString())
                 .subject(userDetails.getUsername())
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 15)) // Token sống 15 phút
+                .expiration(new Date(System.currentTimeMillis() + 1000 * 5)) // Token sống 15 phút
                 .signWith(getSignInKey())
                 .compact();
     }

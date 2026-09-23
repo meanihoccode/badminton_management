@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../api';
 
@@ -16,6 +16,7 @@ const Register = () => {
         email: ''
     });
     const [otp, setOtp] = useState('');
+    const [timeLeft, setTimeLeft] = useState(0);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -30,13 +31,13 @@ const Register = () => {
             const res = await api.post('/api/auth/register/init', formData);
             setMessage({ text: res.data.message || 'OTP đã được gửi đến email!', type: 'success' });
             setStep(2); // Chuyển sang bước OTP
+            setTimeLeft(60); // Đếm ngược 60s
         } catch (error) {
             let errorMsg = 'Đăng ký thất bại. Vui lòng thử lại.';
             if (error.response?.data) {
                 if (error.response.data.message) {
                     errorMsg = error.response.data.message;
                 } else if (typeof error.response.data === 'object') {
-                    // Xử lý map lỗi validation của Spring Boot
                     const errors = Object.values(error.response.data);
                     if (errors.length > 0 && typeof errors[0] === 'string') {
                         errorMsg = errors.join(', ');
@@ -65,6 +66,31 @@ const Register = () => {
             }, 2000);
         } catch (error) {
             let errorMsg = 'Xác thực OTP thất bại.';
+            if (error.response?.data?.message) errorMsg = error.response.data.message;
+            setMessage({ text: errorMsg, type: 'danger' });
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // Countdown logic cho OTP
+    useEffect(() => {
+        if (timeLeft > 0 && step === 2) {
+            const timerId = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
+            return () => clearTimeout(timerId);
+        }
+    }, [timeLeft, step]);
+
+    const handleResendOtp = async () => {
+        if (timeLeft > 0) return;
+        setMessage({ text: '', type: '' });
+        setIsLoading(true);
+        try {
+            const res = await api.post('/api/auth/register/resend', { email: formData.email });
+            setMessage({ text: res.data.message || 'OTP đã được gửi lại thành công!', type: 'success' });
+            setTimeLeft(60); // Bắt đầu đếm ngược lại 60 giây
+        } catch (error) {
+            let errorMsg = 'Gửi lại OTP thất bại.';
             if (error.response?.data?.message) errorMsg = error.response.data.message;
             setMessage({ text: errorMsg, type: 'danger' });
         } finally {
@@ -136,6 +162,28 @@ const Register = () => {
                         <button type="submit" className="btn btn-success" style={{ width: '100%', marginTop: '10px' }} disabled={isLoading}>
                             {isLoading ? 'Đang xác thực...' : 'Xác Thực & Hoàn Tất'}
                         </button>
+                        
+                        {/* Resend OTP Button */}
+                        <div className="text-center" style={{ marginTop: '20px' }}>
+                            <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '5px' }}>Chưa nhận được mã?</p>
+                            <button 
+                                type="button" 
+                                onClick={handleResendOtp} 
+                                disabled={timeLeft > 0 || isLoading}
+                                className="btn" 
+                                style={{ 
+                                    background: 'transparent', 
+                                    color: timeLeft > 0 ? 'var(--text-muted)' : 'var(--primary-color)', 
+                                    fontWeight: 'bold',
+                                    border: 'none',
+                                    padding: '5px 10px',
+                                    cursor: timeLeft > 0 ? 'not-allowed' : 'pointer'
+                                }}
+                            >
+                                Gửi lại mã OTP {timeLeft > 0 && `(${timeLeft}s)`}
+                            </button>
+                        </div>
+
                         <div className="text-center" style={{ marginTop: '15px' }}>
                             <button type="button" onClick={() => setStep(1)} className="btn" style={{ background: 'transparent', color: 'var(--text-muted)' }}>
                                 Quay lại sửa thông tin

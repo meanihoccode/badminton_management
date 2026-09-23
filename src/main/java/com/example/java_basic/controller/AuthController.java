@@ -37,6 +37,12 @@ public class AuthController {
         return ResponseEntity.ok(Map.of("message", "Đăng ký tài khoản thành công"));
     }
 
+    @PostMapping("/register/resend")
+    public ResponseEntity<Map<String, String>> resendOTP(@RequestBody Map<String, String> body) {
+        authService.resendOTP(body.get("email"));
+        return ResponseEntity.ok(Map.of("message", "Mã OTP đã được gửi đến email của bạn"));
+    }
+
     @PostMapping("/login")
     public ResponseEntity<AuthResponseDTO> login(@Valid @RequestBody LoginRequestDTO request) {
         return ResponseEntity.ok(authService.login(request));
