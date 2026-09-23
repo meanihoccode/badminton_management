@@ -2,6 +2,7 @@ package com.example.java_basic.controller;
 
 import com.example.java_basic.constant.AppConstants;
 import com.example.java_basic.dto.*;
+import com.example.java_basic.service.ExcelExportService;
 import com.example.java_basic.service.UserService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
@@ -29,6 +30,7 @@ public class UserController {
 
     private final UserService userService;
     private final MessageSource messageSource;
+    private final ExcelExportService excelExportService;
 
     @GetMapping("/me")
     public ResponseEntity<com.example.java_basic.dto.UserResponseDTO> getMyProfile(Principal principal) {
@@ -83,6 +85,18 @@ public class UserController {
             return ResponseEntity.ok(userService.getMyTransactionsPaged(principal.getName(), date, type, page, size));
         }
         return ResponseEntity.ok(userService.getMyTransactions(principal.getName()));
+    }
+
+    @GetMapping("/me/transactions/export")
+    public ResponseEntity<byte[]> exportMyTransactions(Principal principal) {
+        List<TransactionResponseDTO> transactions = userService.getMyTransactions(principal.getName());
+        byte[] excelBytes = excelExportService.exportTransactionsToExcel(transactions);
+
+        org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+        headers.set(org.springframework.http.HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=transactions.xlsx");
+        headers.set(org.springframework.http.HttpHeaders.CONTENT_TYPE, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+
+        return new ResponseEntity<>(excelBytes, headers, HttpStatus.OK);
     }
 
     @GetMapping("/me/matches")

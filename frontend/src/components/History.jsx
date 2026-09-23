@@ -77,6 +77,22 @@ const History = () => {
         if (activeTab === 'matches') fetchMatches();
     }, [matchPage, activeTab, filterDate]);
 
+    const handleExportExcel = async () => {
+        try {
+            const res = await api.get('/api/users/me/transactions/export', { responseType: 'blob' });
+            const url = window.URL.createObjectURL(new Blob([res.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', 'Lich_Su_Giao_Dich.xlsx');
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        } catch (error) {
+            console.error('Lỗi khi xuất file Excel', error);
+            alert('Có lỗi xảy ra khi xuất file Excel');
+        }
+    };
+
     return (
         <div className="animate-fade-in">
             <h2 className="page-title text-center">Lịch Sử Của Tôi</h2>
@@ -129,7 +145,12 @@ const History = () => {
 
             {activeTab === 'transactions' && (
                 <div className="glass-panel">
-                    <h3 className="mb-4">Dòng tiền của bạn</h3>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+                        <h3 style={{ margin: 0 }}>Dòng tiền của bạn</h3>
+                        <button onClick={handleExportExcel} className="btn btn-success" style={{ padding: '8px 15px', fontSize: '0.9rem' }}>
+                            <i className="fas fa-file-excel"></i> Xuất Excel
+                        </button>
+                    </div>
                     <div style={{ overflowX: 'auto' }}>
                         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                             <thead>

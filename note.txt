@@ -17,6 +17,7 @@ npm run dev
 
 
 test reids
+net start redis
 PS C:\Users\Admin> & "C:\Program Files\Redis\redis-cli.exe"
 127.0.0.1:6379> KEYS *
 
