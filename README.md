@@ -1,92 +1,122 @@
-# Badminton Club Management System (Hệ Thống Quản Lý Sân Cầu Lông)
+# Hệ Thống Quản Lý Câu Lạc Bộ Cầu Lông (Badminton Club Management)
 
-Dự án này là một ứng dụng Web Fullstack hoàn chỉnh giúp các câu lạc bộ (hoặc nhóm) cầu lông dễ dàng quản lý thành viên, lên lịch buổi đánh, ghi nhận điểm số từng set đấu và đặc biệt là tự động hóa việc tính toán chia tiền sân/tiền cầu cực kỳ minh bạch và chính xác.
+Một hệ thống toàn diện hỗ trợ xếp lịch thi đấu, tự động tính toán chi phí và xử lý thanh toán trực tuyến.
 
-Được xây dựng như một đồ án mẫu áp dụng toàn bộ các kiến thức từ giáo trình Lập Trình Web Doanh Nghiệp (Java Spring Boot & React).
-
----
-
-## Các Tính Năng Nổi Bật
-
-- **Xác Thực & Phân Quyền (JWT + Spring Security)**
-  - Tách biệt rõ ràng 2 quyền: ADMIN (Chủ sân) và MEMBER (Thành viên).
-  - Admin có toàn quyền tạo buổi đánh, nhập điểm, thêm/sửa/xóa người chơi và chốt sổ chia tiền.
-  - Member chỉ được phép xem lịch sử đánh và lịch sử giao dịch cá nhân.
-- **Quản Lý Buổi Đánh (Sessions) & Ghi Điểm**
-  - Quản lý danh sách các buổi đánh theo ngày và sân.
-  - Ghi nhận chi tiết từng trận (Game Match) diễn ra trong buổi: Chọn cặp đấu 2 vs 2, ghi nhận điểm số, tự động phân định thắng/thua.
-  - Đội thắng được cộng tiền thưởng (mặc định 5k), đội thua bị trừ tiền ngay lập tức vào ví ảo.
-- **Chốt Sổ & Chia Tiền Tự Động**
-  - Nhập tổng tiền thuê sân và tiền cầu của một buổi đánh.
-  - Hệ thống tự động đếm số lượng người tham gia thực tế ngày hôm đó và chia đều tiền, trừ thẳng vào ví ảo của từng người.
-  - Ngăn chặn chốt sổ nhiều lần (Double-charging) bằng bẫy lỗi an toàn.
-- **Tự Động Nhắc Nợ Bằng Email (Spring Scheduler & Thymeleaf)**
-  - Hệ thống "kế toán máy" thức dậy vào 08:00 sáng mỗi ngày.
-  - Quét tìm tất cả thành viên có số dư âm (đang nợ tiền) và tự động gửi Email nhắc nợ HTML màu sắc đỏ rực để nhắc nhở nộp quỹ.
-- **Tối Ưu Code Bằng MapStruct & Lombok**
-  - Tự động hóa quá trình ánh xạ dữ liệu (Entity <-> DTO).
-- **An Toàn Tuyệt Đối (Unit Test & Mockito)**
-  - Thuật toán tính tiền và chia tiền được bảo vệ bởi bộ Unit Test tự động, đảm bảo không một ai có thể bị tính toán sai sót.
+<p align="left">
+  <img src="https://img.shields.io/badge/Spring_Boot-3.1.5-6DB33F?style=for-the-badge&logo=spring" alt="Spring Boot" />
+  <img src="https://img.shields.io/badge/React-18.0-61DAFB?style=for-the-badge&logo=react" alt="React" />
+  <img src="https://img.shields.io/badge/MySQL-8.0-4479A1?style=for-the-badge&logo=mysql" alt="MySQL" />
+  <img src="https://img.shields.io/badge/Redis-Cache-DC382D?style=for-the-badge&logo=redis" alt="Redis" />
+</p>
 
 ---
 
-## Công Nghệ Sử Dụng
+## 1. Tổng Quan Dự Án
 
-### Backend
-- **Java 17**
-- **Spring Boot 3.x**
-- **Spring Data JPA / Hibernate** (Tương tác Database)
-- **Spring Security & JJWT** (Bảo mật & Cấp vé Token)
-- **Spring Boot Mail & Thymeleaf** (Thiết kế & Gửi Email)
-- **MapStruct & Lombok** (Tối ưu mã nguồn)
-- **JUnit 5 & Mockito** (Kiểm thử)
-- **MySQL** (Hệ Quản Trị CSDL)
+Hệ thống Quản lý Câu lạc bộ Cầu lông là một ứng dụng Web Full-stack cấp doanh nghiệp được thiết kế để số hóa và tự động hóa các hoạt động của câu lạc bộ thể thao. Hệ thống giúp loại bỏ các thao tác thủ công trong việc điểm danh người chơi, tính toán chi phí sân bãi dựa trên số trận đấu, quản lý công nợ và xử lý thanh toán.
 
-### Frontend
-- **React 18** (Vite)
-- **Tailwind CSS** (Thiết kế giao diện đẹp mắt, Responsive)
-- **React Router** (Điều hướng trang)
-- **Axios** (Giao tiếp API với Backend)
+Kiến trúc của dự án tuân thủ nghiêm ngặt các tiêu chuẩn **Clean Code**, **SOLID principles**, và **RESTful API**, sử dụng các bộ khung lập trình (frameworks) hiện đại để đảm bảo khả năng mở rộng, bảo mật và dễ dàng bảo trì.
+
+## 2. Tính Năng Cốt Lõi
+
+### 2.1. Xác Thực và Phân Quyền (Identity & Security)
+- **Role-Based Access Control (RBAC):** Phân chia rõ ràng quyền hạn giữa Quản trị viên (ADMIN) và Thành viên (MEMBER).
+- **Stateless Authentication:** Xác thực bảo mật sử dụng JWT (JSON Web Token) kết hợp cơ chế Refresh Token.
+- **Quy Trình Xác Thực OTP:** Đăng ký tài khoản an toàn thông qua xác thực Email tự động, kết hợp Redis để lưu trữ tạm thời và chống spam.
+
+### 2.2. Xử Lý Trận Đấu và Chi Phí (Match & Fee Processing)
+- **Tự Động Chia Tiền Sân:** Thuật toán phân bổ động và tự động tính toán chi phí sân bãi cho từng người tham gia ngay khi phiên đánh kết thúc.
+- **Theo Dõi Kết Quả:** Ghi nhận tỷ số, đội hình tham gia (Team A vs Team B) và hiệu số điểm.
+- **Bảng Xếp Hạng (Leaderboard):** Thống kê số liệu để xếp hạng các người chơi tích cực nhất.
+
+### 2.3. Tích Hợp Tài Chính & Cổng Thanh Toán
+- **Hệ Thống Ví Nội Bộ:** Quản lý số dư cá nhân của từng thành viên. Tự động trừ tiền khi đánh xong hoặc cộng tiền khi nạp.
+- **Tích Hợp PayOS & VietQR:** Tự động sinh mã VietQR động thông qua SDK của PayOS để chuyển khoản ngân hàng 24/7.
+- **Webhook tự động (Reconciliation):** Lắng nghe Webhook từ ngân hàng để tự động cập nhật số dư vào cơ sở dữ liệu mà không cần sự can thiệp của con người.
+- **Báo Cáo Kế Toán:** Ứng dụng thư viện Apache POI để xuất lịch sử dòng tiền ra file `.xlsx` chuẩn định dạng.
+
+### 2.4. Xử Lý Bất Đồng Bộ (Asynchronous Processing)
+- **Spring JMS & Artemis:** Tách các tác vụ nặng (như gửi email OTP) sang hàng đợi tin nhắn (Message Queue) của ActiveMQ Artemis, giúp giảm thiểu độ trễ API và tăng tốc độ phản hồi cho người dùng.
 
 ---
 
-## Hướng Dẫn Cài Đặt (Local Development)
+## 3. Công Nghệ Sử Dụng (Tech Stack)
 
-### 1. Yêu cầu môi trường
-- JDK 17+
-- Node.js 18+
-- MySQL Server
+### Kiến Trúc Backend
+- **Nền tảng Cốt lõi (Core Framework):** Java 17, Spring Boot 3.1.x
+- **Tương tác Cơ sở dữ liệu (Persistence Layer):** Spring Data JPA, Hibernate ORM
+- **Cơ sở dữ liệu Quan hệ (RDBMS):** MySQL 8 (Tối ưu hóa các câu lệnh truy vấn phức tạp cho báo cáo)
+- **Hệ thống Lưu trữ Tạm thời (Caching Strategy):** 
+  - **Redis:** Quản lý Global Cache, lưu trữ Refresh Token và Session phân tán.
+  - **Caffeine Cache:** Xử lý Local Cache tốc độ cao (In-memory) áp dụng cho luồng đếm ngược OTP (`expireAfterWrite`).
+- **Hàng Đợi Thông Điệp (Message Broker & Async):** Spring JMS tích hợp Apache ActiveMQ Artemis (Mô hình Embedded) để tách luồng xử lý gửi Email, giảm độ trễ (latency) cho Main Thread.
+- **Bảo mật (Security & IAM):** Spring Security kết hợp JSON Web Token (JJWT) thiết lập cơ chế Stateless Authentication phân quyền cấp độ Method.
+- **Tích hợp Thanh toán (Payment Gateway):** PayOS SDK (Sinh VietQR động và tiếp nhận Webhook đối soát giao dịch tự động).
+- **Trình tạo Tài liệu (Document Generation):** Apache POI (Ghi xuất dữ liệu Dòng tiền ra định dạng `.xlsx` chuẩn kế toán).
+- **Giao tiếp Email (SMTP):** Spring Boot Mail kết hợp Thymeleaf Engine để render Template HTML gửi Email chuyên nghiệp.
+- **Tiện ích và Sinh mã (Code Utilities):** 
+  - **MapStruct:** Trình ánh xạ (Mapper) hiệu năng cao chuyên biệt cho Entity ↔ DTO.
+  - **Lombok:** Tự động sinh mã Boilerplate (Getter, Setter, Builder Pattern).
+  - **Hibernate Validator:** Kiểm duyệt tính toàn vẹn của dữ liệu đầu vào (Data Validation) tại Controller.
 
-### 2. Thiết lập Backend (Spring Boot)
-1. Tạo một cơ sở dữ liệu mới trong MySQL (Ví dụ: badminton_db).
-2. Mở thư mục dự án Java bằng IntelliJ IDEA hoặc Eclipse.
-3. Nhân bản (Copy) file src/main/resources/application-example.properties và đổi tên thành application.properties.
-4. Điền các thông tin kết nối DB, JWT Secret Key và cấu hình Gmail App Password của bạn vào file application.properties vừa tạo.
-5. Chạy ứng dụng bằng lệnh:
+### Kiến Trúc Frontend
+- **Thư viện chính:** React 18
+- **Điều hướng:** React Router DOM v6
+- **Giao tiếp HTTP:** Axios
+- **Giao diện:** CSS thuần với phong cách Glassmorphism UI
+
+---
+
+## 4. Kiến Trúc Phần Mềm (System Architecture)
+
+- **Controller Layer:** Tiếp nhận yêu cầu HTTP, kiểm tra (validate) dữ liệu đầu vào và điều hướng.
+- **Service Layer:** Xử lý logic nghiệp vụ cốt lõi, hoàn toàn độc lập với các giao thức mạng hay cơ sở dữ liệu.
+- **Repository Layer:** Giao tiếp trực tiếp với cơ sở dữ liệu quan hệ thông qua Spring Data JPA.
+- **Mapper Layer (MapStruct):** Tách biệt rạch ròi giữa Domain Entities (thực thể Database) và DTOs (đối tượng truyền tải dữ liệu).
+- **Event-Driven Components:** Áp dụng JMS Listeners để xử lý các tác vụ nền.
+
+---
+
+## 5. Hướng Dẫn Cài Đặt (Getting Started)
+
+### Yêu Cầu Hệ Thống (Prerequisites)
+- **JDK 17** hoặc mới hơn
+- **Node.js 18+** & npm
+- **MySQL 8** (Port mặc định: 3306)
+- **Redis** (Port mặc định: 6379)
+- **Ngrok** (Dành cho việc test Webhook thanh toán PayOS trên Localhost)
+
+### 5.1. Khởi Tạo Cơ Sở Dữ Liệu
+Tạo một schema mới trong MySQL:
+```sql
+CREATE DATABASE badminton_db;
+```
+
+### 5.2. Cấu Hình Backend
+1. Di chuyển vào thư mục gốc của dự án.
+2. Tạo file cấu hình từ file mẫu:
    ```bash
+   cp application.properties.example src/main/resources/application.properties
+   ```
+3. Cập nhật `application.properties` với thông tin Database, Secret Key của JWT, Mật khẩu ứng dụng Gmail và API Key của PayOS.
+4. Biên dịch và Khởi chạy:
+   ```bash
+   ./gradlew build -x test
    ./gradlew bootRun
    ```
+   *Backend sẽ khởi chạy tại `http://localhost:8080`.*
 
-### 3. Thiết lập Frontend (React)
-1. Mở một cửa sổ Terminal khác, di chuyển vào thư mục frontend:
+### 5.3. Cấu Hình Frontend
+1. Di chuyển vào thư mục `frontend`:
    ```bash
    cd frontend
    ```
-2. Cài đặt các thư viện cần thiết:
+2. Cài đặt các thư viện phụ thuộc:
    ```bash
    npm install
    ```
-3. Chạy Server phát triển giao diện:
+3. Khởi chạy máy chủ phát triển (Development Server):
    ```bash
-   npm run dev
+   npm start
    ```
-4. Mở trình duyệt và truy cập vào đường dẫn http://localhost:5173.
-
----
-
-## Tài Liệu Kỹ Thuật
-Nếu bạn muốn tìm hiểu sâu hơn về kiến trúc ngầm của dự án, vui lòng đọc các tài liệu phân tích mã nguồn chi tiết trong thư mục document/:
-- [Tổng kết Giáo trình NCC](document/ncc_syllabus_mapping.md)
-- [Bảo Mật & Cơ chế JWT](document/security_jwt.md)
-- [Scheduler & Gửi Email Tự Động](document/email_service.md)
-- [Từ Điển Các Spring Annotations](document/spring_annotations.md)
+   *Frontend sẽ hoạt động tại `http://localhost:3000`.*
