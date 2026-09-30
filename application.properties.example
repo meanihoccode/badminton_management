@@ -71,3 +71,9 @@ spring.artemis.mode=embedded
 spring.artemis.embedded.enabled=true
 spring.artemis.embedded.queues=emailQueue
 spring.artemis.packages.trust-all=true
+
+# ===============================
+# 10. GOOGLE RECAPTCHA V2 CONFIG
+# ===============================
+# Generate Site Key and Secret Key from Google reCAPTCHA Admin Console
+google.recaptcha.secret-key=YOUR_RECAPTCHA_SECRET_KEY
