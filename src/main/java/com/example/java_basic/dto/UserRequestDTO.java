@@ -15,7 +15,6 @@ public class UserRequestDTO {
     @UniqueUsername
     private String username;
 
-    // THÊM TRƯỜNG NÀY
     @NotBlank(message = "{val.password.notblank}")
     @Size(min = 6, max = 20, message = "{val.password.size}")
     private String password;

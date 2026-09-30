@@ -23,3 +23,6 @@ PS C:\Users\Admin> & "C:\Program Files\Redis\redis-cli.exe"
 
 làm nút resend OTP
 export excel
+
+spam OTP
+dùng capcha (gg)

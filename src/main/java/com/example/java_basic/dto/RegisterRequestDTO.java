@@ -30,6 +30,9 @@ public class RegisterRequestDTO {
 
     @Size(max = 100, message = "{val.racket.size}")
     private String racketModel;
+    
     private String role;
-}
 
+    @NotBlank(message = "Mã xác thực CAPTCHA không được để trống")
+    private String recaptchaToken;
+}

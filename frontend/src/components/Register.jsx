@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import ReCAPTCHA from 'react-google-recaptcha';
 import api from '../api';
 
 const Register = () => {
@@ -7,6 +8,7 @@ const Register = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [message, setMessage] = useState({ text: '', type: '' });
     const navigate = useNavigate();
+    const recaptchaRef = useRef(null);
 
     // Form data
     const [formData, setFormData] = useState({
@@ -17,6 +19,7 @@ const Register = () => {
     });
     const [otp, setOtp] = useState('');
     const [timeLeft, setTimeLeft] = useState(0);
+    const [recaptchaToken, setRecaptchaToken] = useState(null);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -24,11 +27,18 @@ const Register = () => {
 
     const handleInitRegister = async (e) => {
         e.preventDefault();
+        
+        if (!recaptchaToken) {
+            setMessage({ text: 'Vui lòng xác nhận bạn không phải người máy!', type: 'danger' });
+            return;
+        }
+
         setMessage({ text: '', type: '' });
         setIsLoading(true);
 
         try {
-            const res = await api.post('/api/auth/register/init', formData);
+            const payload = { ...formData, recaptchaToken };
+            const res = await api.post('/api/auth/register/init', payload);
             setMessage({ text: res.data.message || 'OTP đã được gửi đến email!', type: 'success' });
             setStep(2); // Chuyển sang bước OTP
             setTimeLeft(60); // Đếm ngược 60s
@@ -45,6 +55,11 @@ const Register = () => {
                 }
             }
             setMessage({ text: errorMsg, type: 'danger' });
+            // Reset reCAPTCHA if failed so they have to solve it again
+            setRecaptchaToken(null);
+            if (recaptchaRef.current) {
+                recaptchaRef.current.reset();
+            }
         } finally {
             setIsLoading(false);
         }
@@ -140,7 +155,17 @@ const Register = () => {
                             <input type="password" name="password" className="form-input" required 
                                 value={formData.password} onChange={handleChange} placeholder="Nhập mật khẩu..." />
                         </div>
-                        <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '10px' }} disabled={isLoading}>
+
+                        <div className="form-group" style={{ display: 'flex', justifyContent: 'center', marginTop: '15px' }}>
+                            <ReCAPTCHA
+                                ref={recaptchaRef}
+                                sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
+                                onChange={(token) => setRecaptchaToken(token)}
+                                onExpired={() => setRecaptchaToken(null)}
+                            />
+                        </div>
+
+                        <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '10px' }} disabled={isLoading || !recaptchaToken}>
                             {isLoading ? 'Đang xử lý...' : 'Đăng Ký'}
                         </button>
                         <div className="text-center" style={{ marginTop: '15px' }}>

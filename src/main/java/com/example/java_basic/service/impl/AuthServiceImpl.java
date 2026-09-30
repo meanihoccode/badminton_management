@@ -40,6 +40,7 @@ public class AuthServiceImpl implements AuthService {
     private final EmailService emailService;
     private final CacheManager cacheManager;
     private final StringRedisTemplate redisTemplate;
+    private final com.example.java_basic.service.CaptchaService captchaService;
 
     @Value("${jwt.refresh.expiration:604800000}")
     private long refreshExpiration;
@@ -52,6 +53,11 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void initiateRegistration(RegisterRequestDTO request) {
+        // Verify CAPTCHA first
+        if (!captchaService.verifyToken(request.getRecaptchaToken())) {
+            throw new IllegalArgumentException("Xác thực CAPTCHA thất bại, vui lòng thử lại.");
+        }
+
         // Validate is already done by @Valid in Controller
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new IllegalArgumentException("Username đã tồn tại");
